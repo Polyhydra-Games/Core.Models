@@ -1,7 +1,6 @@
 # Core Models pipeline
 name: 1.0.1.$(rev:r)
-variables:
-- group: Pat
+variables: 
 - name: ModelsSolution
   value: PolyhydraGames.Core.Models.sln
 - name: ModelsProject
