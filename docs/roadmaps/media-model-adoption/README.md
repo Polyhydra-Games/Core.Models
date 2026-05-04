@@ -34,3 +34,7 @@ Track the phased rollout of `PolyhydraGames.Core.Models.Media` across downstream
 - [ ] At least one downstream catalog reads the shared shape without app-specific glue in `Core.Models`.
 - [ ] Serialization behavior is verified with realistic downstream payloads.
 - [ ] Open naming questions are resolved before broad adoption.
+
+## Related Roadmaps
+
+- [Shared Model Contracts](../shared-model-contracts/README.md)

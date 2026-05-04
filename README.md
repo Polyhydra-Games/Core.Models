@@ -14,6 +14,13 @@ A .NET utility library providing common models, helpers, and reactive extensions
 | | `CacheHelper` | Utility methods for cache management |
 | **Data** | `CSVExtensions` | CSV parsing and generation extension methods |
 | | `JsonHelper` | JSON serialization/deserialization helpers |
+| **Identifiers** | `IStronglyTypedId<TValue>` | Marker contract for primitive-backed identifier value objects |
+| | `StronglyTypedId` | Factory and parse helpers for primitive-backed identifier value objects |
+| | `StronglyTypedGuidConverter<TId>` | JSON converter for GUID-backed identifier structs |
+| | `StronglyTypedStringConverter<TId>` | JSON converter for string-backed identifier structs |
+| | `StronglyTypedInt32Converter<TId>` | JSON converter for int-backed identifier structs |
+| | `StronglyTypedInt64Converter<TId>` | JSON converter for long-backed identifier structs |
+| | `StronglyTypedIdJsonConverterFactory` | JSON converter factory for supported strongly typed ID backing types |
 | **Media** | `LocalMediaFile` | Shared model for local/NAS-backed media files |
 | | `MediaScanRoot` | Shared model for filesystem or NAS scan roots |
 | | `MediaTechnicalMetadata` | Shared technical metadata container for video/audio/image/ROM details |
@@ -98,6 +105,7 @@ dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj
 ### Typical Usage
 ```csharp
 using PolyhydraGames.Core.Models;
+using PolyhydraGames.Core.Models.Identifiers;
 using PolyhydraGames.Core.Models.Media;
 
 // Now use any of the types listed above
@@ -116,3 +124,4 @@ Detailed documentation can be found in the following sections:
 - [Feature Index](./docs/features/README.md)
 - [Core Capabilities](./docs/features/core-capabilities.md)
 - [Media Models](./docs/features/media-models/README.md)
+- [Strongly Typed Identifiers](./docs/features/strongly-typed-identifiers/README.md)

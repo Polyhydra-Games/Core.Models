@@ -21,6 +21,13 @@
 | `CacheHelper` | Cache utilities |
 | `CSVExtensions` | CSV parsing/generation |
 | `JsonHelper` | JSON serialization helpers |
+| `IStronglyTypedId<TValue>` | Marker contract for primitive-backed identifier value objects |
+| `StronglyTypedId` | Factory and parse helpers for primitive-backed identifier value objects |
+| `StronglyTypedGuidConverter<TId>` | JSON converter for GUID-backed identifier structs |
+| `StronglyTypedStringConverter<TId>` | JSON converter for string-backed identifier structs |
+| `StronglyTypedInt32Converter<TId>` | JSON converter for int-backed identifier structs |
+| `StronglyTypedInt64Converter<TId>` | JSON converter for long-backed identifier structs |
+| `StronglyTypedIdJsonConverterFactory` | JSON converter factory for supported strongly typed ID backing types |
 | `LocalMediaFile` | Shared local/NAS-backed media file model |
 | `MediaScanRoot` | Shared scan-root model for local and network media libraries |
 | `MediaTechnicalMetadata` | Shared technical metadata model for video/audio/image/ROM details |
@@ -50,3 +57,4 @@
 ## Feature Docs
 
 - [Media Models](features/media-models/README.md)
+- [Strongly Typed Identifiers](features/strongly-typed-identifiers/README.md)
