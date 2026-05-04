@@ -5,7 +5,7 @@ owner: @DreadBreadcrumb
 priority: high
 complexity: 1
 created: 2026-03-22
-updated: 2026-03-22
+updated: 2026-05-04
 tags: [documentation, Core.Models]
 ---
 
@@ -18,6 +18,7 @@ This directory documents all features and roadmap items. All state is now tracke
 - [Visual Studio Solution](./visual-studio-solution.md)
 - [Sub-module: Models](./sub-module-models.md)
 - [Sub-module: Tests](./sub-module-tests.md)
+- [Media Models](./media-models/README.md)
 
 
 ## Beyond the App

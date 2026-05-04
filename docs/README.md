@@ -2,12 +2,15 @@
 
 ## Contents
 
-- [core-models](docs/core-models.md)
+- [Core Models](core-models.md)
+- [Feature Index](features/README.md)
 
 ## Roadmap
 
-- [v1](docs/roadmap/v1/README.md)
+- [v1](roadmap/v1/README.md)
+- [Media Model Adoption](roadmaps/media-model-adoption/README.md)
+- [Portfolio Roadmap](roadmaps/portfolio-roadmap.md)
 
 ## Decisions
 
-- [Template](docs/decisions/0000-template.md)
+- [Template](decisions/0000-template.md)

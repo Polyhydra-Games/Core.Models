@@ -11,7 +11,7 @@
 - `PolyhydraGames.Extensions`
 - `System.Reactive`
 
-**Target Frameworks:** net8.0 (implied)
+**Target Frameworks:** net8.0 and net9.0
 
 ## Key Types
 
@@ -21,6 +21,10 @@
 | `CacheHelper` | Cache utilities |
 | `CSVExtensions` | CSV parsing/generation |
 | `JsonHelper` | JSON serialization helpers |
+| `LocalMediaFile` | Shared local/NAS-backed media file model |
+| `MediaScanRoot` | Shared scan-root model for local and network media libraries |
+| `MediaTechnicalMetadata` | Shared technical metadata model for video/audio/image/ROM details |
+| `MediaPathHelpers` | Pure path and extension normalization helpers |
 | `ObservableExtensions` | Reactive extensions |
 | `ObservableFileMonitor` | File system watcher wrapper |
 | `OneTimeUseBool` | Bool that flips from true to false once |
@@ -35,7 +39,14 @@
 - All API projects
 - Spotabot
 - Channel Cheevos
+- core.nas
+- SvengoolieDB
+- chop-it
 
 ## Status
 
 ✅ **Working** — Stable utility library.
+
+## Feature Docs
+
+- [Media Models](features/media-models/README.md)

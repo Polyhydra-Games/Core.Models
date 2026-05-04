@@ -1,8 +1,15 @@
-# Starter pipeline
+# Core Models pipeline
 name: 1.0.1.$(rev:r)
-variables: 
-- name: Project.Path
-  value: '**/PolyhydraGames.Core.Models.csproj'
+variables:
+- group: Pat
+- name: ModelsSolution
+  value: PolyhydraGames.Core.Models.sln
+- name: ModelsProject
+  value: Models/PolyhydraGames.Core.Models.csproj
+- name: ModelsTests
+  value: Tests/PolyhydraGames.Core.Models.Test.csproj
+- name: BuildConfiguration
+  value: Release
 
 trigger:
   branches:
@@ -11,26 +18,38 @@ trigger:
   paths:
     include:
     - Models
+    - Tests
 jobs:
 - job: Phase_1 
-  cancelTimeoutInMinutes: 1
+  cancelTimeoutInMinutes: 5
   pool:
     name: Default
   steps:
   - checkout: self
   - task: DotNetCoreCLI@2
+    displayName: dotnet restore
+    inputs:
+      command: restore
+      projects: '$(ModelsSolution)'
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build
+    inputs:
+      command: build
+      projects: '$(ModelsSolution)'
+      arguments: '--configuration $(BuildConfiguration) --no-restore'
+  - task: DotNetCoreCLI@2
     displayName: dotnet test
     inputs:
       command: test
-      projects: 'Tests/PolyhydraGames.Core.Models.Test.csproj'
-      arguments: '--configuration Release'
+      projects: '$(ModelsTests)'
+      arguments: '--configuration $(BuildConfiguration) --no-restore'
   - task: DotNetCoreCLI@2
-    displayName: dotnet build and pack
+    displayName: dotnet pack
     inputs:
       command: pack
-      packagesToPack: '$(Project.Path)' 
-      versioningScheme: 'byBuildNumber'
-      arguments: --configuration Release
+      packagesToPack: '$(ModelsProject)'
+      versioningScheme: byBuildNumber
+      arguments: '--configuration $(BuildConfiguration) --no-restore --include-source --include-symbols'
   - task: NuGetCommand@2
     displayName: Poly NuGet push
     inputs:
@@ -39,17 +58,9 @@ jobs:
       feedPublish: 015fc12f-cd63-4ab4-8d6a-dc889e53bf70
       allowPackageConflicts: false
   - task: NuGetCommand@2
+    displayName: NuGet.org push
     inputs:
-      displayName: NuGet.org push
       command: 'push'
       packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
       nuGetFeedType: 'external'
       publishFeedCredentials: 'Nuget Org'
-  - task: ado-discord-webhook@1
-    inputs:
-      channelId: '1083779130576879656'
-      webhookKey: 'QAhq2PpBl9iUSv51rQNPajpVZivOdj-hMcClCwHBz7OFdyxuI9Ni_Ykvglpxw53oDX9D'
-      name: 'Polyhydra Build'
-      avatar: 'https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/277759422_459407522643032_5740191239763665615_n.png?_nc_cat=109&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=Eh7rt73EuYcAX-1w6EJ&_nc_ht=scontent-iad3-1.xx&oh=00_AfA8K4k2WtaqlaA0CEznY-Hk2DZY3gsdDwPp-XOw3L1B3Q&oe=64121C61'
-      messageType: 'content'
-      content: 'PolyhydraGames.Core.Models Completed Build: $(Build.BuildNumber)'
