@@ -36,10 +36,13 @@ public class StronglyTypedIdentifierTests
         var options = CreateFactoryOptions();
 
         Assert.That(JsonSerializer.Deserialize<TestFactoryPlatformId>("\" twitch-user \"", options).Value, Is.EqualTo("twitch-user"));
+        Assert.That(JsonSerializer.Deserialize<TestFactoryOptionalPlatformId>("null", options).IsEmpty, Is.True);
+        Assert.That(JsonSerializer.Deserialize<TestFactoryOptionalPlatformId>("\"   \"", options).IsEmpty, Is.True);
         Assert.That(JsonSerializer.Deserialize<TestFactoryNumericId>("42", options).Value, Is.EqualTo(42));
         Assert.That(JsonSerializer.Deserialize<TestFactorySnowflakeId>("\"9223372036854775\"", options).Value, Is.EqualTo(9_223_372_036_854_775));
 
         Assert.That(JsonSerializer.Serialize(new TestFactoryPlatformId("twitch-user"), options), Is.EqualTo("\"twitch-user\""));
+        Assert.That(JsonSerializer.Serialize(new TestFactoryOptionalPlatformId("twitch-user"), options), Is.EqualTo("\"twitch-user\""));
         Assert.That(JsonSerializer.Serialize(new TestFactoryNumericId(42), options), Is.EqualTo("42"));
         Assert.That(JsonSerializer.Serialize(new TestFactorySnowflakeId(9_223_372_036_854_775), options), Is.EqualTo("9223372036854775"));
     }
@@ -109,6 +112,26 @@ public class StronglyTypedIdentifierTests
         Assert.That(id.Value, Is.EqualTo("12345"));
         Assert.That(ok, Is.True);
         Assert.That(tryParsed, Is.EqualTo(id));
+    }
+
+    [Test]
+    public void StringBackedId_RejectsJsonNull()
+    {
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<TestPlatformId>("null"));
+    }
+
+    [Test]
+    public void OptionalStringBackedId_NormalizesMissingValues()
+    {
+        var nullJson = JsonSerializer.Deserialize<TestOptionalPlatformId>("null");
+        var whitespaceJson = JsonSerializer.Deserialize<TestOptionalPlatformId>("\"   \"");
+        var helperValue = new TestOptionalPlatformId(StringIdHelpers.NormalizeOptional(" twitch-user "));
+
+        Assert.That(nullJson.IsEmpty, Is.True);
+        Assert.That(whitespaceJson.IsEmpty, Is.True);
+        Assert.That(helperValue.Value, Is.EqualTo("twitch-user"));
+        Assert.That(StringIdHelpers.IsMissing("   "), Is.True);
+        Assert.That(StringIdHelpers.IsMissing("twitch-user"), Is.False);
     }
 
     [Test]
@@ -350,6 +373,24 @@ public class StronglyTypedIdentifierTests
     }
 
     [DebuggerDisplay("{Value}")]
+    private readonly struct TestFactoryOptionalPlatformId : IOptionalStringId
+    {
+        public TestFactoryOptionalPlatformId(string? value)
+        {
+            Value = StringIdHelpers.NormalizeOptional(value);
+        }
+
+        public string Value { get; }
+
+        public bool IsEmpty => StringIdHelpers.IsMissing(Value);
+
+        public override string ToString()
+        {
+            return Value;
+        }
+    }
+
+    [DebuggerDisplay("{Value}")]
     private readonly struct TestFactoryNumericId : IStronglyTypedId<int>
     {
         public TestFactoryNumericId(int value)
@@ -389,7 +430,7 @@ public class StronglyTypedIdentifierTests
 
     [DebuggerDisplay("{Value}")]
     [JsonConverter(typeof(StronglyTypedStringConverter<TestPlatformId>))]
-    private readonly struct TestPlatformId : IEquatable<TestPlatformId>, IStronglyTypedId<string>
+    private readonly struct TestPlatformId : IEquatable<TestPlatformId>, IStringId
     {
         public TestPlatformId(string? value)
         {
@@ -418,6 +459,40 @@ public class StronglyTypedIdentifierTests
         public override bool Equals(object? obj)
         {
             return obj is TestPlatformId other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return IsEmpty ? 0 : Value.GetHashCode();
+        }
+    }
+
+    [DebuggerDisplay("{Value}")]
+    [JsonConverter(typeof(StronglyTypedOptionalStringConverter<TestOptionalPlatformId>))]
+    private readonly struct TestOptionalPlatformId : IEquatable<TestOptionalPlatformId>, IOptionalStringId
+    {
+        public TestOptionalPlatformId(string? value)
+        {
+            Value = StringIdHelpers.NormalizeOptional(value);
+        }
+
+        public string Value { get; }
+
+        public bool IsEmpty => StringIdHelpers.IsMissing(Value);
+
+        public override string ToString()
+        {
+            return Value;
+        }
+
+        public bool Equals(TestOptionalPlatformId other)
+        {
+            return string.Equals(Value, other.Value, StringComparison.Ordinal);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is TestOptionalPlatformId other && Equals(other);
         }
 
         public override int GetHashCode()

@@ -24,6 +24,9 @@ public sealed class StronglyTypedIdJsonConverterFactory : JsonConverterFactory
         if (backingType == typeof(Guid))
             return CreateConverter(typeof(StronglyTypedGuidConverter<>), typeToConvert);
 
+        if (typeof(IOptionalStringId).IsAssignableFrom(typeToConvert))
+            return CreateConverter(typeof(StronglyTypedOptionalStringConverter<>), typeToConvert);
+
         if (backingType == typeof(string))
             return CreateConverter(typeof(StronglyTypedStringConverter<>), typeToConvert);
 

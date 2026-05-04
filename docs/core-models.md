@@ -22,9 +22,14 @@
 | `CSVExtensions` | CSV parsing/generation |
 | `JsonHelper` | JSON serialization helpers |
 | `IStronglyTypedId<TValue>` | Marker contract for primitive-backed identifier value objects |
+| `IGuidId` | Common contract for GUID-backed identifiers |
+| `IStringId` | Common contract for string-backed identifiers |
+| `IOptionalStringId` | Common contract for string-backed identifiers where empty means missing |
+| `StringIdHelpers` | Shared normalization helpers for optional string identifiers |
 | `StronglyTypedId` | Factory and parse helpers for primitive-backed identifier value objects |
 | `StronglyTypedGuidConverter<TId>` | JSON converter for GUID-backed identifier structs |
 | `StronglyTypedStringConverter<TId>` | JSON converter for string-backed identifier structs |
+| `StronglyTypedOptionalStringConverter<TId>` | JSON converter for optional string-backed identifier structs |
 | `StronglyTypedInt32Converter<TId>` | JSON converter for int-backed identifier structs |
 | `StronglyTypedInt64Converter<TId>` | JSON converter for long-backed identifier structs |
 | `StronglyTypedIdJsonConverterFactory` | JSON converter factory for supported strongly typed ID backing types |

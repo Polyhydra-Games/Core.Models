@@ -28,8 +28,11 @@ This feature should export the reusable pattern, converters, and tests. App-spec
 ## Candidate Contract Shape
 
 - [x] `IStronglyTypedId<TValue>` common marker for strongly typed IDs.
+- [x] `IGuidId`, `IStringId`, and `IOptionalStringId` convenience contracts.
+- [x] `StringIdHelpers` optional string-ID normalization helpers.
 - [x] GUID-backed ID converter pattern.
 - [x] String-backed ID converter pattern.
+- [x] Optional string-backed ID converter pattern for JSON null/whitespace as empty.
 - [x] Int-backed ID converter pattern.
 - [x] JSON converters for each backing family.
 - [x] Optional converter factory for strongly typed IDs.
@@ -50,6 +53,7 @@ String-backed IDs:
 
 - [x] Normalize null, empty, and whitespace consistently when the concrete ID chooses that policy.
 - [x] Decide whether empty string means "no ID" or invalid per concrete ID.
+- [x] Keep strict string IDs separate from optional string IDs so null handling is explicit.
 - [x] Preserve platform IDs without accidental numeric conversion.
 - [x] Support JSON string round trips.
 
@@ -72,6 +76,7 @@ Long-backed IDs:
 - [x] Fix copied error messages before implementation. `IdentityId` errors should not say `UserId`.
 - [ ] Preserve compatibility for existing downstream IDs until callers migrate.
 - [ ] Prefer adding shared base/converter patterns first, then move concrete IDs only when ownership is clear.
+- [x] Preserve the streaming-facing optional string ID policy without forcing it onto all string-backed IDs.
 
 ## Non-Goals
 
@@ -83,5 +88,6 @@ Long-backed IDs:
 
 - [x] Strongly typed ID contracts compile under the same target frameworks as `Core.Models`.
 - [x] Tests cover GUID-backed, string-backed, int-backed, and long-backed IDs.
+- [x] Tests cover optional string-backed IDs, JSON null handling, and factory selection.
 - [x] Tests cover equality, invalid input, explicit conversion, JSON serialization, JSON deserialization, and cross-type safety.
 - [x] Downstream migration notes name `OAuth.Core` and streaming-facing ID types as first consumers.

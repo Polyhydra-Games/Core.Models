@@ -27,8 +27,11 @@ tags: [feature, checklist, identifiers, Core.Models]
 ## Contracts
 
 - [x] Define shared ID interface or marker.
+- [x] Define GUID/string/optional-string convenience interfaces.
+- [x] Define optional string ID normalization helpers.
 - [x] Define GUID-backed pattern.
 - [x] Define string-backed pattern.
+- [x] Define optional string-backed pattern.
 - [x] Define int-backed pattern.
 - [x] Define long-backed pattern.
 - [x] Define JSON converter strategy.
@@ -38,6 +41,7 @@ tags: [feature, checklist, identifiers, Core.Models]
 
 - [x] GUID-backed equality and invalid input tests.
 - [x] String-backed normalization and equality tests.
+- [x] Optional string-backed null/whitespace JSON tests.
 - [x] Int-backed invalid value tests.
 - [x] Long-backed round-trip and invalid value tests.
 - [x] JSON serialization tests.
