@@ -11,7 +11,7 @@
 - Tests indexed: no
 
 ## Implemented now (V1 baseline)
-- Core model capabilities and API shape are documented in `coremodels.md`, `core-capabilities.md`, and `core-application-logic.md`.
+- Core model capabilities and API shape are documented in `coremodels.md`, `core-capabilities.md`, and `shared-model-contracts/README.md`.
 - Test scaffolding is documented in `sub-module-tests.md`.
 - Standardized structure and solution layout are tracked in docs.
 
@@ -25,7 +25,7 @@
 - [ ] Add deterministic migration/check list for model shape changes.
 - [ ] Add release gate for `README`/feature updates when model behavior shifts.
 - [ ] Add examples for backward-compatible model updates.
-- [ ] Establish shared-contract import criteria in `docs/roadmaps/shared-model-contracts/`.
+- [x] Establish shared-contract import criteria in `docs/roadmaps/shared-model-contracts/`.
 
 ## V2 (confidence)
 - [ ] Expand test coverage for common model edge cases and fallbacks.

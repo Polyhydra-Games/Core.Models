@@ -29,10 +29,10 @@ This roadmap is intentionally contract-first. `Core.Models` should own stable DT
 
 ## Target Consumers
 
-- [ ] `core.nas` for scanning, indexing, and media catalog API contracts.
-- [ ] `SvengoolieDB` for catalog media, provider IDs, episodes, assets, and companion-boundary handoff.
-- [ ] `chop-it` for playlist, queue, clipping input references, and operator media selections.
-- [ ] CDN/media normalization tooling for static asset references and delivery URLs.
+- [x] `core.nas` for scanning, indexing, and media catalog API contracts.
+- [x] `SvengoolieDB` for catalog media, provider IDs, episodes, assets, and companion-boundary handoff.
+- [x] `chop-it` for playlist, queue, clipping input references, and operator media selections.
+- [x] CDN/media normalization tooling for static asset references and delivery URLs.
 - [ ] `Media-Metadata` for provider reference handoff without moving provider logic here.
 - [ ] Channel Cheevos and adjacent apps only for generic result/readiness/paging contracts that are truly app-agnostic.
 
@@ -75,6 +75,13 @@ This roadmap is intentionally contract-first. `Core.Models` should own stable DT
 - [ ] Add small generic result models for operation status, validation errors, warnings, and readiness summaries.
 - [ ] Avoid replacing framework-native result types where the app already has a clear pattern.
 - [ ] Prefer simple serializable contracts over service abstractions.
+
+### Ownership Split
+
+- [x] `Core.Models` owns the shared contract types.
+- [x] `core.nas` owns retry, caching, normalization, and intake behavior.
+- [x] `SvengoolieDB` and `chop-it` consume the shared contract instead of redefining it.
+- [ ] `Core.Nas.REST` or a similar transport layer can exist if the HTTP surface needs separate request/response models.
 
 ### Paging, Filtering, And Sorting Contracts
 
