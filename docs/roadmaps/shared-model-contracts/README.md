@@ -3,7 +3,7 @@ title: Shared Model Contracts Roadmap
 status: planned
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-05-06
 tags: [roadmap, Core.Models, shared-contracts, media, api-models]
 ---
 
@@ -19,12 +19,14 @@ This roadmap is intentionally contract-first. `Core.Models` should own stable DT
 
 - [x] `Core.Models` contains general utility models and helpers.
 - [x] `Core.Models` now contains base local/NAS-backed media file contracts.
+- [x] `Core.Models` now contains first playlist/playout contracts.
 - [x] Media model docs and adoption roadmap exist.
 - [x] Strongly typed identifier contracts, converters, helpers, and tests now exist.
 - [ ] Shared asset references are not modeled yet.
 - [ ] External provider ID contracts are not modeled yet.
 - [ ] Media relationship contracts are not modeled yet.
-- [ ] Playlist and playback queue data shapes are not modeled yet.
+- [x] Playlist data shapes are modeled under `PolyhydraGames.Core.Models.Media.Playlists`.
+- [ ] Playback queue data shapes are not modeled yet.
 - [ ] Generic API result, paging, filtering, and readiness contracts are not modeled yet.
 
 ## Target Consumers
@@ -66,7 +68,7 @@ This roadmap is intentionally contract-first. `Core.Models` should own stable DT
 
 ### Playlist And Queue Contracts
 
-- [ ] Add data-only playlist models.
+- [x] Add data-only playlist models.
 - [ ] Add data-only playback queue/request models.
 - [ ] Keep FFmpeg execution, playback orchestration, clipping, and operator UI in `chop-it` or app repos.
 

@@ -3,7 +3,7 @@ title: Shared Model Contracts Phases
 status: planned
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-05-06
 tags: [roadmap, phases, Core.Models, shared-contracts]
 ---
 
@@ -56,11 +56,10 @@ tags: [roadmap, phases, Core.Models, shared-contracts]
 
 ## Phase 5: Playlist And Queue Contracts
 
-- [ ] Create `docs/features/playlist-contracts/`.
-- [ ] Add data-only playlist and playlist-item models.
+- [x] Add first data-only playlist and playlist-item models under `docs/features/media-models/`.
 - [ ] Add data-only queue/request models.
-- [ ] Add examples for `chop-it` without adding execution behavior.
-- [ ] Add serialization tests.
+- [x] Add examples for `chop-it` and `app-busey-box` without adding execution behavior.
+- [x] Add serialization tests.
 
 ## Phase 6: Generic API Utility Contracts
 

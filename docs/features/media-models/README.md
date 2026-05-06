@@ -5,7 +5,7 @@ owner: @DreadBreadcrumb
 priority: high
 complexity: 2
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-05-06
 tags: [feature, Core.Models, media, local-files, shared-models]
 ---
 
@@ -13,7 +13,7 @@ tags: [feature, Core.Models, media, local-files, shared-models]
 
 ## Summary
 
-`PolyhydraGames.Core.Models.Media` defines shared model contracts for local and NAS-backed media files. The feature gives `core.nas`, `SvengoolieDB`, `chop-it`, and CDN-related tooling one common language for file identity, storage location, availability, broad media kind, and technical metadata.
+`PolyhydraGames.Core.Models.Media` defines shared model contracts for local and NAS-backed media files. The feature gives `core.nas`, `SvengoolieDB`, `chop-it`, `app-busey-box`, and CDN-related tooling one common language for file identity, storage location, availability, broad media kind, and technical metadata.
 
 This feature intentionally does not own scanning, database indexing, ffprobe execution, playback, playlist orchestration, or external title lookup. Those remain in application or service projects.
 
@@ -26,6 +26,7 @@ This feature intentionally does not own scanning, database indexing, ffprobe exe
 - [x] File storage details are represented by `MediaFileLocation`.
 - [x] The canonical shared file DTO is `LocalMediaFile`.
 - [x] Technical metadata is modeled for video, audio, image, and ROM files.
+- [x] Portable playlist/playout contracts live under `PolyhydraGames.Core.Models.Media.Playlists`.
 - [x] Path and extension helpers are dependency-free.
 - [x] Serialization and helper behavior is covered by tests.
 - [ ] Downstream repositories have not yet adopted the shared contracts.
@@ -37,6 +38,7 @@ This feature intentionally does not own scanning, database indexing, ffprobe exe
 - [x] Shared DTOs and enums.
 - [x] Pure normalization and classification helpers.
 - [x] Stable cross-project contract names.
+- [x] Portable playlist identity, source, playback, item, and validation models.
 - [ ] Contract compatibility notes for broad downstream adoption.
 
 Downstream owners:
@@ -44,7 +46,9 @@ Downstream owners:
 - [ ] `core.nas` owns filesystem scanning, NAS indexing, ffmpeg/ffprobe metadata extraction, persistence, and availability refresh.
 - [ ] `SvengoolieDB` owns catalog-specific title, episode, image, and playback mapping.
 - [ ] `Media-Metadata` owns external provider metadata such as TVMaze, TMDb, OMDb, TheTVDB, and Watchmode.
-- [ ] `chop-it` owns playback, clipping, playlists, and operator flow.
+- [ ] `chop-it` owns concrete playback, clipping, playlist generation, and operator flow.
+- [ ] `core.ffmpeg` owns FFmpeg command construction, RTMP/HLS/file output, overlays, runtime text, ffprobe, and process lifecycle.
+- [ ] `app-busey-box` owns concrete RTMP/Twitch playout, now-playing state, and Docker/runtime broadcast control.
 
 ## Model Notes
 
@@ -53,6 +57,8 @@ Downstream owners:
 - `PublicUrl` is optional and should be set only by a delivery layer.
 - `TechnicalMetadata` is optional because not every caller will run ffprobe or image metadata extraction.
 - `MediaFileId` is a string so apps can use database IDs, provider keys, or stable synthetic IDs without forcing a shared persistence shape.
+- `MediaPlaylist` intentionally models portable playlist shape, not FFmpeg output, Twitch credentials, Docker runtime, or operator controls.
+- `MediaPlaylist.Metadata` and `MediaPlaylistItem.Metadata` are escape hatches for consumer hints that should not force immediate NuGet churn.
 
 ## Validation
 
@@ -61,6 +67,8 @@ Downstream owners:
 - [x] `MediaPathHelpers.NormalizeRelativePath` covers Windows separators, leading slashes, whitespace, and null input.
 - [x] `MediaPathHelpers.ClassifyByExtension` covers video, audio, image, ROM, document, unknown, and other extensions.
 - [x] `LocalMediaFile` JSON round-trips the shared model shape.
+- [x] `MediaPlaylist` JSON round-trips Busey-style manifests and Chop-It segment/source options.
+- [x] `MediaPlaylistHelpers` reports invalid manifest shape.
 
 ## Next Steps
 
@@ -68,4 +76,11 @@ Downstream owners:
 - [ ] Add mapping extension methods in `SvengoolieDB`.
 - [ ] Audit CDN file records for overlap with `MediaFileLocation`.
 - [ ] Decide whether `MediaKind.Rom` should become `GameRom` before broad adoption.
-- [ ] Decide whether playlist contracts belong here or in a later `Core.Models.Media.Playlists` namespace.
+- [x] Add first playlist/playout contracts under `Core.Models.Media.Playlists`.
+- [ ] Add downstream playlist mapping in `chop-it` and `app-busey-box` before expanding fields.
+
+## Cross-Repo Coordination
+
+- [SvengoolieDB media metadata transition](</home/lancer1977/code/SvengoolieDB/docs/roadmaps/media-metadata-transition/README.md>)
+- [One-swoop execution map](</home/lancer1977/code/SvengoolieDB/docs/roadmaps/media-metadata-transition/execution-map.md>)
+- [Cross-project link map](</home/lancer1977/code/SvengoolieDB/docs/roadmaps/media-metadata-transition/link-map.md>)

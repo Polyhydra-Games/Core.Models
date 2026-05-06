@@ -36,6 +36,7 @@
 | `LocalMediaFile` | Shared local/NAS-backed media file model |
 | `MediaScanRoot` | Shared scan-root model for local and network media libraries |
 | `MediaTechnicalMetadata` | Shared technical metadata model for video/audio/image/ROM details |
+| `MediaPlaylist` | Shared playlist/playout manifest model under `PolyhydraGames.Core.Models.Media.Playlists` |
 | `MediaPathHelpers` | Pure path and extension normalization helpers |
 | `ObservableExtensions` | Reactive extensions |
 | `ObservableFileMonitor` | File system watcher wrapper |

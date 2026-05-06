@@ -3,7 +3,7 @@ title: Media Models Checklist
 status: in-progress
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-05-06
 tags: [feature, checklist, media, Core.Models]
 ---
 
@@ -35,6 +35,11 @@ tags: [feature, checklist, media, Core.Models]
 - [x] Add `AudioMediaMetadata`.
 - [x] Add `ImageMediaMetadata`.
 - [x] Add `RomMediaMetadata`.
+- [x] Add `MediaPlaylist`.
+- [x] Add `MediaPlaylistSource`.
+- [x] Add `MediaPlaylistPlaybackOptions`.
+- [x] Add `MediaPlaylistItem`.
+- [x] Add playlist validation helpers.
 
 ## Helpers
 
@@ -49,11 +54,13 @@ tags: [feature, checklist, media, Core.Models]
 - [x] Cover relative-path normalization.
 - [x] Cover extension classification.
 - [x] Cover JSON serialization round trip.
+- [x] Cover playlist manifest serialization and validation.
 - [ ] Add downstream mapping tests in consuming repos.
 
 ## Release Readiness
 
 - [x] Repository tests pass.
 - [x] New public media API members have XML documentation.
+- [ ] Validate playlist shape in `chop-it` and `app-busey-box` before broad expansion.
 - [ ] Confirm package version/release notes before publishing.
 - [ ] Validate adoption in at least one downstream consumer before treating the contract as stable.

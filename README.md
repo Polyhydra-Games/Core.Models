@@ -29,6 +29,7 @@ A .NET utility library providing common models, helpers, and reactive extensions
 | **Media** | `LocalMediaFile` | Shared model for local/NAS-backed media files |
 | | `MediaScanRoot` | Shared model for filesystem or NAS scan roots |
 | | `MediaTechnicalMetadata` | Shared technical metadata container for video/audio/image/ROM details |
+| | `MediaPlaylist` | Shared playlist/playout manifest for media, clipping, and broadcast consumers |
 | | `MediaPathHelpers` | Pure path, extension, and media-kind normalization helpers |
 | **Reactive** | `ObservableExtensions` | Custom reactive extensions for System.Reactive |
 | | `ObservableFileMonitor` | File system watcher wrapper using observables |

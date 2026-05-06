@@ -3,7 +3,7 @@ title: Media Models Implementation Notes
 status: in-progress
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-05-06
 tags: [feature, implementation, media, Core.Models]
 ---
 
@@ -16,6 +16,8 @@ tags: [feature, implementation, media, Core.Models]
 - [x] Kept helpers pure and dependency-free.
 - [x] Preserved nullable optional fields for metadata that may not exist.
 - [x] Added XML documentation to new public media contracts.
+- [x] Added `Models/Media/Playlists/` for portable playlist/playout contracts.
+- [x] Added playlist source, playback, item, validation, now-playing fallback, and playable-item helpers.
 
 ## Test Coverage
 
@@ -23,6 +25,9 @@ tags: [feature, implementation, media, Core.Models]
 - [x] `NormalizeRelativePath_ReturnsPortableRelativePath`
 - [x] `ClassifyByExtension_ReturnsExpectedMediaKind`
 - [x] `LocalMediaFile_SerializesAndDeserializesSharedShape`
+- [x] `MediaPlaylist_SerializesBuseyStyleManifestShape`
+- [x] `MediaPlaylist_SupportsChopItSegmentOptionsAndEmbeddedMedia`
+- [x] `MediaPlaylistHelpers_ReportsShapeErrors`
 
 ## Cleanup Notes
 

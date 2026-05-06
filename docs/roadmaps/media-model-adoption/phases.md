@@ -3,7 +3,7 @@ title: Media Model Adoption Phases
 status: planned
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-05-06
 tags: [roadmap, phases, media, Core.Models]
 ---
 
@@ -14,6 +14,7 @@ tags: [roadmap, phases, media, Core.Models]
 - [x] Add shared contracts to `Core.Models`.
 - [x] Add focused helper and serialization tests.
 - [x] Document the feature boundary.
+- [x] Add first portable playlist/playout contracts.
 - [ ] Resolve `Rom` versus `GameRom` naming.
 - [ ] Decide whether checksum algorithm belongs in the model.
 
@@ -21,6 +22,8 @@ tags: [roadmap, phases, media, Core.Models]
 
 - [ ] Pick first downstream repo.
 - [ ] Add mapping extensions in the downstream repo.
+- [ ] Map `chop-it` playlist output into `MediaPlaylist`.
+- [ ] Map `app-busey-box` manifests into `MediaPlaylist`.
 - [ ] Add mapping tests with realistic data.
 - [ ] Capture any model gaps back in `docs/features/media-models/roadmap.md`.
 
