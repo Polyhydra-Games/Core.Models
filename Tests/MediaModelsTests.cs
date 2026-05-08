@@ -75,6 +75,20 @@ public class MediaModelsTests
                     Channels = 2,
                     SampleRateHz = 48000
                 }
+            },
+            Enrichment = new MediaEnrichmentMetadata
+            {
+                Title = "Svengoolie - The Killer Shrews",
+                Description = "A hosted horror broadcast.",
+                ReleaseYear = 1959,
+                Genres = "Horror, Sci-Fi",
+                RuntimeMinutes = 97,
+                Provider = "tmdb",
+                ProviderKey = "12345",
+                ImdbLink = "https://www.imdb.com/title/tt0051730/",
+                TvMazeLink = "https://www.tvmaze.com/",
+                PosterUrl = "https://example.com/poster.jpg",
+                BackdropUrl = "https://example.com/backdrop.jpg"
             }
         };
 
@@ -88,6 +102,8 @@ public class MediaModelsTests
         Assert.That(roundTrip.Location.RelativePath, Is.EqualTo(file.Location.RelativePath));
         Assert.That(roundTrip.TechnicalMetadata!.Video!.Width, Is.EqualTo(1920));
         Assert.That(roundTrip.TechnicalMetadata.Audio!.Codec, Is.EqualTo("aac"));
+        Assert.That(roundTrip.Enrichment!.Title, Is.EqualTo("Svengoolie - The Killer Shrews"));
+        Assert.That(roundTrip.Enrichment.Provider, Is.EqualTo("tmdb"));
     }
 
     [Test]

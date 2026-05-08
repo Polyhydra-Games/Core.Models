@@ -17,6 +17,7 @@ tags: [feature, roadmap, media, Core.Models]
 - [ ] Adopt playlist contracts in `app-busey-box` manifest loading.
 - [ ] Audit CDN models for overlap with `MediaFileLocation`.
 - [ ] Add one downstream serialization sample once adoption starts.
+- [x] Model optional enrichment metadata for catalog/provider overlays.
 
 ## Decisions
 

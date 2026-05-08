@@ -20,10 +20,11 @@ This roadmap is intentionally contract-first. `Core.Models` should own stable DT
 - [x] `Core.Models` contains general utility models and helpers.
 - [x] `Core.Models` now contains base local/NAS-backed media file contracts.
 - [x] `Core.Models` now contains first playlist/playout contracts.
+- [x] `Core.Models` now contains optional media enrichment metadata for provider/catalog overlays.
 - [x] Media model docs and adoption roadmap exist.
 - [x] Strongly typed identifier contracts, converters, helpers, and tests now exist.
 - [ ] Shared asset references are not modeled yet.
-- [ ] External provider ID contracts are not modeled yet.
+- [ ] External provider ID contracts are not modeled yet as a standalone family.
 - [ ] Media relationship contracts are not modeled yet.
 - [x] Playlist data shapes are modeled under `PolyhydraGames.Core.Models.Media.Playlists`.
 - [ ] Playback queue data shapes are not modeled yet.

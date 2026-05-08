@@ -18,6 +18,7 @@ tags: [feature, implementation, media, Core.Models]
 - [x] Added XML documentation to new public media contracts.
 - [x] Added `Models/Media/Playlists/` for portable playlist/playout contracts.
 - [x] Added playlist source, playback, item, validation, now-playing fallback, and playable-item helpers.
+- [x] Added optional media enrichment metadata for provider/catalog overlays.
 
 ## Test Coverage
 
@@ -28,6 +29,7 @@ tags: [feature, implementation, media, Core.Models]
 - [x] `MediaPlaylist_SerializesBuseyStyleManifestShape`
 - [x] `MediaPlaylist_SupportsChopItSegmentOptionsAndEmbeddedMedia`
 - [x] `MediaPlaylistHelpers_ReportsShapeErrors`
+- [x] `LocalMediaFile_SerializesAndDeserializesSharedShape` now includes enrichment metadata.
 
 ## Cleanup Notes
 

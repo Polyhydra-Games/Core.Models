@@ -31,6 +31,7 @@ tags: [feature, checklist, media, Core.Models]
 - [x] Add `MediaFileLocation`.
 - [x] Add `LocalMediaFile`.
 - [x] Add `MediaTechnicalMetadata`.
+- [x] Add `MediaEnrichmentMetadata`.
 - [x] Add `VideoMediaMetadata`.
 - [x] Add `AudioMediaMetadata`.
 - [x] Add `ImageMediaMetadata`.
@@ -55,6 +56,7 @@ tags: [feature, checklist, media, Core.Models]
 - [x] Cover extension classification.
 - [x] Cover JSON serialization round trip.
 - [x] Cover playlist manifest serialization and validation.
+- [x] Cover optional enrichment metadata round trip.
 - [ ] Add downstream mapping tests in consuming repos.
 
 ## Release Readiness

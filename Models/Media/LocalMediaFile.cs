@@ -61,4 +61,9 @@ public sealed record LocalMediaFile
     /// Optional technical metadata extracted from media-specific tooling.
     /// </summary>
     public MediaTechnicalMetadata? TechnicalMetadata { get; init; }
+
+    /// <summary>
+    /// Optional provider or catalog enrichment data for the media file.
+    /// </summary>
+    public MediaEnrichmentMetadata? Enrichment { get; init; }
 }
