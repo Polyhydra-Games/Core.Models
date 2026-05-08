@@ -13,7 +13,7 @@ tags: [feature, Core.Models, media, local-files, shared-models]
 
 ## Summary
 
-`PolyhydraGames.Core.Models.Media` defines shared model contracts for local and NAS-backed media files. The feature gives `core.nas`, `SvengoolieDB`, `chop-it`, `app-busey-box`, and CDN-related tooling one common language for file identity, storage location, availability, broad media kind, and technical metadata.
+`PolyhydraGames.Core.Models.Media` defines shared model contracts for local and NAS-backed media files. The feature gives `core.nas`, `SvengoolieDB`, `chop-it`, `app-busey-box`, and CDN-related tooling one common language for file identity, storage location, availability, broad media kind, technical metadata, and optional catalog/provider enrichment.
 
 This feature intentionally does not own scanning, database indexing, ffprobe execution, playback, playlist orchestration, or external title lookup. Those remain in application or service projects.
 
@@ -26,10 +26,11 @@ This feature intentionally does not own scanning, database indexing, ffprobe exe
 - [x] File storage details are represented by `MediaFileLocation`.
 - [x] The canonical shared file DTO is `LocalMediaFile`.
 - [x] Technical metadata is modeled for video, audio, image, and ROM files.
+- [x] Optional enrichment metadata is modeled for catalog/provider overlays.
 - [x] Portable playlist/playout contracts live under `PolyhydraGames.Core.Models.Media.Playlists`.
 - [x] Path and extension helpers are dependency-free.
 - [x] Serialization and helper behavior is covered by tests.
-- [ ] Downstream repositories have not yet adopted the shared contracts.
+- [x] Downstream repositories are now adopting the shared contracts in code, with compatibility checks in both `core.nas` and `SvengoolieDB`.
 
 ## Ownership
 
@@ -39,7 +40,7 @@ This feature intentionally does not own scanning, database indexing, ffprobe exe
 - [x] Pure normalization and classification helpers.
 - [x] Stable cross-project contract names.
 - [x] Portable playlist identity, source, playback, item, and validation models.
-- [ ] Contract compatibility notes for broad downstream adoption.
+- [x] Contract compatibility notes for broad downstream adoption.
 
 Downstream owners:
 
@@ -69,15 +70,22 @@ Downstream owners:
 - [x] `LocalMediaFile` JSON round-trips the shared model shape.
 - [x] `MediaPlaylist` JSON round-trips Busey-style manifests and Chop-It segment/source options.
 - [x] `MediaPlaylistHelpers` reports invalid manifest shape.
+- [x] `LocalMediaFile` round-trips optional enrichment metadata.
 
 ## Next Steps
 
-- [ ] Add mapping extension methods in `core.nas`.
-- [ ] Add mapping extension methods in `SvengoolieDB`.
+- [x] Add mapping extension methods in `core.nas`.
+- [x] Add mapping extension methods in `SvengoolieDB`.
 - [ ] Audit CDN file records for overlap with `MediaFileLocation`.
 - [ ] Decide whether `MediaKind.Rom` should become `GameRom` before broad adoption.
 - [x] Add first playlist/playout contracts under `Core.Models.Media.Playlists`.
 - [ ] Add downstream playlist mapping in `chop-it` and `app-busey-box` before expanding fields.
+
+## Compatibility Notes Captured
+
+- `core.nas` maps `MediaFile` into `LocalMediaFile` using `MediaFile.Id` + `NasServerId` as canonical identity fields and leaves provider IDs out of the shared contract.
+- `SvengoolieDB` maps `CatalogAsset` into `LocalMediaFile` using `CatalogAssetId` + `CatalogMovieId` as local identity fields, with movie metadata carried in `MediaEnrichmentMetadata`.
+- Neither adopter relies on `FullPath` in `LocalMediaFile` for routing or matching across services; `RelativePath` and `RootId` are the stable fields.
 
 ## Cross-Repo Coordination
 
