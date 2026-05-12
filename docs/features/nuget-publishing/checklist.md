@@ -27,7 +27,9 @@ tags: [checklist, nuget, publishing, core-models]
 
 ## Release
 
-- [ ] Add `NUGET_API_KEY` to GitHub repository secrets if missing.
+- [x] Confirm GitHub Actions restore, test, and pack succeed.
+- [x] Confirm publish currently fails because `NUGET_API_KEY` is not set.
+- [ ] Add `NUGET_API_KEY` to GitHub repository secrets.
 - [ ] Push to `main`.
 - [ ] Confirm the package appears on nuget.org.
 
