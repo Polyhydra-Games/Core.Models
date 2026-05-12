@@ -33,7 +33,7 @@ The package is already public on nuget.org. The repository now owns repeatable p
 
 - [ ] `NUGET_API_KEY` must exist in the `lancer1977/Core.Models` repository secrets.
 
-The workflow has been verified through restore, test, and pack. The current publish failure is a 401 from nuget.org because the secret is empty.
+The workflow has been verified through restore, test, and pack. If the secret is missing, the workflow keeps the build green and emits a warning instead of publishing.
 
 ## Validation
 
