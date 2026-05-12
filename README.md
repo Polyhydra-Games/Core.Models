@@ -82,10 +82,12 @@ var obj = json.FromJson<MyType>();
 
 ## Integration Instructions
 
-### Install via NuGet (internal feed)
+### Install via NuGet
 ```xml
-<PackageReference Include="PolyhydraGames.Core.Models" Version="*" />
+<PackageReference Include="PolyhydraGames.Core.Models" Version="1.0.1.20" />
 ```
+
+The package is published publicly on nuget.org. New `main` builds publish `1.0.2.<run_number>` when the repository has a valid `NUGET_API_KEY` secret.
 
 ### Target Frameworks
 - **Main package:** `net8.0` and `net9.0` (multi-target)

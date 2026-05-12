@@ -5,7 +5,23 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591</NoWarn>
+		<PackageId>PolyhydraGames.Core.Models</PackageId>
+		<VersionPrefix>1.0.2</VersionPrefix>
+		<Authors>Chris Richmond</Authors>
+		<Company>PolyhydraGames</Company>
+		<Product>PolyhydraGames Core Models</Product>
+		<Description>Shared DTOs, media contracts, identifiers, caching, serialization helpers, and reactive utilities for PolyhydraGames projects.</Description>
+		<PackageTags>polyhydragames;models;media;dto;utilities</PackageTags>
+		<PackageProjectUrl>https://github.com/lancer1977/Core.Models</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/lancer1977/Core.Models</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
 
 

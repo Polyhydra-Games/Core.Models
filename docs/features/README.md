@@ -20,6 +20,7 @@ This directory documents all features and roadmap items. All state is now tracke
 - [Sub-module: Tests](./sub-module-tests.md)
 - [Media Models](./media-models/README.md)
 - [Strongly Typed Identifiers](./strongly-typed-identifiers/README.md)
+- [Public NuGet Publishing](./nuget-publishing/README.md)
 
 
 ## Beyond the App
