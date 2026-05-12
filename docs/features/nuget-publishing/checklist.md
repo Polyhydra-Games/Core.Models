@@ -23,6 +23,7 @@ tags: [checklist, nuget, publishing, core-models]
 - [x] Add README packaging metadata.
 - [x] Add a GitHub Actions workflow for restore, test, pack, and publish.
 - [x] Use `1.0.2.<run_number>` for the next automated public package line.
+- [x] Install .NET 8, .NET 9, and .NET 10 in CI for the package target frameworks and tests.
 
 ## Release
 

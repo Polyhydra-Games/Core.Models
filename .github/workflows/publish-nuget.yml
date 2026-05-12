@@ -13,7 +13,6 @@ permissions:
   contents: read
 
 env:
-  DOTNET_VERSION: 10.0.x
   PACKAGE_VERSION: 1.0.2.${{ github.run_number }}
 
 jobs:
@@ -28,7 +27,10 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
 
       - name: Restore
         run: dotnet restore Tests/PolyhydraGames.Core.Models.Test.csproj
