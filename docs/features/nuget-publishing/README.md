@@ -35,6 +35,13 @@ The package is already public on nuget.org. The repository now owns repeatable p
 
 The workflow has been verified through restore, test, and pack. If the secret is missing, the workflow keeps the build green and emits a warning instead of publishing.
 
+## Latest Publish
+
+- [x] `NUGET_API_KEY` is configured in GitHub repository secrets.
+- [x] Workflow dispatch published `PolyhydraGames.Core.Models` version `1.0.2.6`.
+- [x] GitHub Actions log showed nuget.org returned `Created` and `Your package was pushed`.
+- [ ] NuGet flat-container index still needs to show `1.0.2.6` after validation/indexing completes.
+
 ## Validation
 
 - [ ] Confirm the workflow publishes a `1.0.2.x` package from `main`.
