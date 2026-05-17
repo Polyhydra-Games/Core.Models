@@ -107,6 +107,40 @@ public class MediaModelsTests
     }
 
     [Test]
+    public void MediaAppLaunchRequest_SerializesPortableLaunchShape()
+    {
+        var request = new MediaAppLaunchRequest
+        {
+            AppId = "vlc",
+            TargetSlug = "media://svengoolie-live/Movies/The%20Blob%20%281958%29.mkv",
+            DeviceId = "stream-box",
+            Target = new MediaLaunchTarget
+            {
+                RootId = "svengoolie-live",
+                RelativePath = "Movies/The Blob (1958).mkv",
+                MediaFileId = "catalog:the-blob",
+                FileName = "The Blob (1958).mkv",
+                Kind = MediaKind.Video,
+                Title = "The Blob",
+                PosterUrl = "https://cdn.example/poster.jpg",
+                SourceCatalogId = "9b8fdf31-0c88-41bc-b879-8d4b1a8d6f50"
+            }
+        };
+
+        var json = JsonSerializer.Serialize(request);
+        var roundTrip = JsonSerializer.Deserialize<MediaAppLaunchRequest>(json);
+
+        Assert.That(roundTrip, Is.Not.Null);
+        Assert.That(roundTrip!.AppId, Is.EqualTo("vlc"));
+        Assert.That(roundTrip.DeviceId, Is.EqualTo("stream-box"));
+        Assert.That(roundTrip.TargetSlug, Is.EqualTo(request.TargetSlug));
+        Assert.That(roundTrip.Target.RootId, Is.EqualTo("svengoolie-live"));
+        Assert.That(roundTrip.Target.RelativePath, Is.EqualTo("Movies/The Blob (1958).mkv"));
+        Assert.That(roundTrip.Target.Kind, Is.EqualTo(MediaKind.Video));
+        Assert.That(roundTrip.Target.Title, Is.EqualTo("The Blob"));
+    }
+
+    [Test]
     public void MediaPlaylist_SerializesBuseyStyleManifestShape()
     {
         var playlist = new MediaPlaylist
