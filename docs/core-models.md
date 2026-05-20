@@ -36,6 +36,22 @@
 | `LocalMediaFile` | Shared local/NAS-backed media file model |
 | `MediaScanRoot` | Shared scan-root model for local and network media libraries |
 | `MediaTechnicalMetadata` | Shared technical metadata model for video/audio/image/ROM details |
+| `MediaRelationshipKind` | Shared directional relationship kind enum |
+| `MediaRelationshipEndpointKind` | Shared entity kind enum for relationship endpoints |
+| `MediaRelationship` | Shared directional relationship model between catalog and asset entities |
+| `MediaRelationshipEndpoint` | Shared entity reference used by media relationships |
+| `MediaQueueItemState` | Shared lifecycle state for playback queue items |
+| `MediaPlaybackQueueRequest` | Shared request for queueing media playback items |
+| `MediaPlaybackQueue` | Shared playback queue snapshot |
+| `ApiOperationResult` | Shared success/failure result envelope |
+| `ApiOperationResult<T>` | Shared typed success/failure result envelope |
+| `ApiReadinessSummary` | Shared readiness summary for operator surfaces |
+| `PagedRequest` | Shared page-based query request contract |
+| `PagedResult<T>` | Shared page-based response contract |
+| `MediaScanProgress` | Shared scan-progress snapshot for media indexing jobs |
+| `MediaScanSummary` | Shared scan summary for media indexing jobs |
+| `MediaAssetReference` | Shared portable media asset reference model |
+| `MediaProviderReference` | Shared portable external provider reference model |
 | `MediaPlaylist` | Shared playlist/playout manifest model under `PolyhydraGames.Core.Models.Media.Playlists` |
 | `MediaPathHelpers` | Pure path and extension normalization helpers |
 | `ObservableExtensions` | Reactive extensions |

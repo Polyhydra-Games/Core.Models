@@ -11,19 +11,19 @@ tags: [feature, roadmap, media, Core.Models]
 
 ## Near Term
 
-- [ ] Adopt these contracts in `core.nas` by mapping scanner output to `LocalMediaFile`.
-- [ ] Adopt these contracts in `SvengoolieDB` where catalog media assets reference local or NAS-backed files.
-- [ ] Adopt playlist contracts in `chop-it` generated playlist output.
-- [ ] Adopt playlist contracts in `app-busey-box` manifest loading.
-- [ ] Audit CDN models for overlap with `MediaFileLocation`.
-- [ ] Add one downstream serialization sample once adoption starts.
+- [x] Adopt these contracts in `core.nas` by mapping scanner output to `LocalMediaFile`.
+- [x] Adopt these contracts in `SvengoolieDB` where catalog media assets reference local or NAS-backed files.
+- [x] Adopt playlist contracts in `chop-it` generated playlist output.
+- [x] Adopt playlist contracts in `app-busey-box` manifest loading.
+- [x] Audit CDN models for overlap with `MediaFileLocation`. Current CDN file descriptors stay delivery-specific; no shared location shape was promoted yet.
+- [x] Add one downstream serialization sample once adoption starts.
 - [x] Model optional enrichment metadata for catalog/provider overlays.
 
 ## Decisions
 
-- [ ] Decide whether `MediaKind.Rom` should stay as-is or become `GameRom`.
+- [x] Decide whether `MediaKind.Rom` should stay as-is or become `GameRom`. Keep `Rom` as the compatibility name.
 - [x] Decide whether playlist contracts belong in this namespace.
-- [ ] Decide whether checksum type or algorithm should be modeled explicitly.
+- [x] Decide whether checksum type or algorithm should be modeled explicitly. Keep the checksum as a plain string for now.
 
 ## Later
 

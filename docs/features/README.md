@@ -19,6 +19,13 @@ This directory documents all features and roadmap items. All state is now tracke
 - [Sub-module: Models](./sub-module-models.md)
 - [Sub-module: Tests](./sub-module-tests.md)
 - [Media Models](./media-models/README.md)
+- [Media Relationships](./media-relationships/README.md)
+- [Queue and Request Contracts](./queue-request-contracts/README.md)
+- [API Utility Contracts](./api-utility-contracts/README.md)
+- [Scan Progress Contracts](./scan-progress-contracts/README.md)
+- [Model Contract Stability](./model-contract-stability/README.md)
+- [Media Asset References](./media-asset-references/README.md)
+- [External Provider References](./external-provider-references/README.md)
 - [Strongly Typed Identifiers](./strongly-typed-identifiers/README.md)
 - [Public NuGet Publishing](./nuget-publishing/README.md)
 

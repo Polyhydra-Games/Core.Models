@@ -5,7 +5,7 @@ owner: @DreadBreadcrumb
 priority: high
 complexity: 2
 created: 2026-05-04
-updated: 2026-05-06
+updated: 2026-05-20
 tags: [feature, Core.Models, media, local-files, shared-models]
 ---
 
@@ -27,10 +27,13 @@ This feature intentionally does not own scanning, database indexing, ffprobe exe
 - [x] The canonical shared file DTO is `LocalMediaFile`.
 - [x] Technical metadata is modeled for video, audio, image, and ROM files.
 - [x] Optional enrichment metadata is modeled for catalog/provider overlays.
+- [x] Portable media asset references are modeled under `MediaAssetReference`.
+- [x] Portable external provider references are modeled under `MediaProviderReference`.
+- [x] Portable relationship contracts are modeled under `MediaRelationship`.
 - [x] Portable playlist/playout contracts live under `PolyhydraGames.Core.Models.Media.Playlists`.
 - [x] Path and extension helpers are dependency-free.
 - [x] Serialization and helper behavior is covered by tests.
-- [x] Downstream repositories are now adopting the shared contracts in code, with compatibility checks in both `core.nas` and `SvengoolieDB`.
+- [x] Downstream repositories are now adopting the shared contracts in code, with compatibility checks in `core.nas`, `SvengoolieDB`, and `chop-it`.
 
 ## Ownership
 
@@ -44,12 +47,12 @@ This feature intentionally does not own scanning, database indexing, ffprobe exe
 
 Downstream owners:
 
-- [ ] `core.nas` owns filesystem scanning, NAS indexing, ffmpeg/ffprobe metadata extraction, persistence, and availability refresh.
-- [ ] `SvengoolieDB` owns catalog-specific title, episode, image, and playback mapping.
+- [x] `core.nas` owns filesystem scanning, NAS indexing, ffmpeg/ffprobe metadata extraction, persistence, and availability refresh.
+- [x] `SvengoolieDB` owns catalog-specific title, episode, image, and playback mapping.
 - [ ] `Media-Metadata` owns external provider metadata such as TVMaze, TMDb, OMDb, TheTVDB, and Watchmode.
-- [ ] `chop-it` owns concrete playback, clipping, playlist generation, and operator flow.
+- [x] `chop-it` owns concrete playback, clipping, playlist generation, and operator flow.
 - [ ] `core.ffmpeg` owns FFmpeg command construction, RTMP/HLS/file output, overlays, runtime text, ffprobe, and process lifecycle.
-- [ ] `app-busey-box` owns concrete RTMP/Twitch playout, now-playing state, and Docker/runtime broadcast control.
+- [x] `app-busey-box` owns concrete RTMP/Twitch playout, now-playing state, and Docker/runtime broadcast control.
 
 ## Model Notes
 
@@ -58,6 +61,9 @@ Downstream owners:
 - `PublicUrl` is optional and should be set only by a delivery layer.
 - `TechnicalMetadata` is optional because not every caller will run ffprobe or image metadata extraction.
 - `MediaFileId` is a string so apps can use database IDs, provider keys, or stable synthetic IDs without forcing a shared persistence shape.
+- `MediaAssetReference` is intentionally portable and does not own upload, storage, or delivery behavior.
+- `MediaProviderReference` is intentionally portable and does not own provider lookup, search, or fetch behavior.
+- `MediaRelationship` is intentionally portable and does not own relationship resolution, graph traversal, or persistence behavior.
 - `MediaPlaylist` intentionally models portable playlist shape, not FFmpeg output, Twitch credentials, Docker runtime, or operator controls.
 - `MediaPlaylist.Metadata` and `MediaPlaylistItem.Metadata` are escape hatches for consumer hints that should not force immediate NuGet churn.
 
@@ -77,9 +83,11 @@ Downstream owners:
 - [x] Add mapping extension methods in `core.nas`.
 - [x] Add mapping extension methods in `SvengoolieDB`.
 - [ ] Audit CDN file records for overlap with `MediaFileLocation`.
-- [ ] Decide whether `MediaKind.Rom` should become `GameRom` before broad adoption.
+- [x] Decide whether `MediaKind.Rom` should become `GameRom` before broad adoption. Keep `Rom` for compatibility.
 - [x] Add first playlist/playout contracts under `Core.Models.Media.Playlists`.
-- [ ] Add downstream playlist mapping in `chop-it` and `app-busey-box` before expanding fields.
+- [x] Add downstream playlist mapping in `chop-it` before expanding fields.
+- [x] Add downstream playlist mapping in `app-busey-box` before expanding fields.
+- [x] Add relationship contracts for catalog and asset linking.
 
 ## Compatibility Notes Captured
 
