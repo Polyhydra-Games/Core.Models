@@ -3,7 +3,7 @@ title: Shared Model Contracts Milestones
 status: planned
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-05-20
 tags: [roadmap, milestones, Core.Models, shared-contracts]
 ---
 
@@ -11,10 +11,10 @@ tags: [roadmap, milestones, Core.Models, shared-contracts]
 
 ## M1: Contract Boundary Documented
 
-- [ ] `model-contract-stability` feature folder exists.
-- [ ] Import criteria are documented.
-- [ ] Non-goals are documented.
-- [ ] Compatibility checklist exists.
+- [x] `model-contract-stability` feature folder exists.
+- [x] Import criteria are documented.
+- [x] Non-goals are documented.
+- [x] Compatibility checklist exists.
 
 ## M2: Media Reference Foundation
 
@@ -24,32 +24,32 @@ tags: [roadmap, milestones, Core.Models, shared-contracts]
 
 ## M3: Media Reference Foundation
 
-- [ ] Media asset references are implemented.
-- [ ] External provider references are implemented.
-- [ ] Media relationship contracts are implemented.
-- [ ] Serialization tests cover realistic catalog/media examples.
+- [x] Media asset references are implemented.
+- [x] External provider references are implemented.
+- [x] Media relationship contracts are implemented.
+- [x] Serialization tests cover realistic catalog/media examples.
 
 ## M4: Operator Media Flow Contracts
 
-- [ ] Playlist contracts are implemented.
-- [ ] Queue/request contracts are implemented.
-- [ ] `chop-it` adoption path is documented without moving execution behavior.
+- [x] Playlist contracts are implemented.
+- [x] Queue/request contracts are implemented.
+- [x] `chop-it` adoption path is documented without moving execution behavior.
 
 ## M5: API Utility Foundation
 
-- [ ] Generic result/readiness contracts are implemented if duplication is confirmed.
-- [ ] Paging/filtering/sorting contracts are implemented if duplication is confirmed.
-- [ ] At least one API-facing downstream consumer is named.
+- [x] Generic result/readiness contracts are implemented if duplication is confirmed.
+- [x] Paging/filtering/sorting contracts are implemented if duplication is confirmed.
+- [x] At least one API-facing downstream consumer is named.
 
 ## M6: Scanner Progress Foundation
 
-- [ ] Scan progress contracts are implemented.
-- [ ] `core.nas` adoption path is documented.
-- [ ] No scanner execution behavior moved into `Core.Models`.
+- [x] Scan progress contracts are implemented.
+- [x] `core.nas` adoption path is documented.
+- [x] No scanner execution behavior moved into `Core.Models`.
 
 ## M7: First Adoption Proof
 
-- [ ] One downstream repo maps to a new shared contract family.
-- [ ] Downstream tests pass.
-- [ ] Gaps are captured in docs.
-- [ ] Public contract names are confirmed or renamed before wider rollout.
+- [x] One downstream repo maps to a new shared contract family.
+- [x] Downstream tests pass.
+- [x] Gaps are captured in docs.
+- [x] Public contract names are confirmed or renamed before wider rollout.

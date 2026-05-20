@@ -42,10 +42,12 @@ jobs:
       - name: Pack
         run: dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release -p:PackageVersion=${{ env.PACKAGE_VERSION }} --output artifacts/packages
 
+      - name: Require NuGet publish secret on main
+        if: github.event_name != 'pull_request' && env.NUGET_API_KEY == ''
+        run: |
+          echo "::error::NUGET_API_KEY is not configured, so the package cannot be published to nuget.org from this workflow."
+          exit 1
+
       - name: Publish to nuget.org
         if: github.event_name != 'pull_request' && env.NUGET_API_KEY != ''
         run: dotnet nuget push "artifacts/packages/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY" --skip-duplicate
-
-      - name: NuGet publish secret missing
-        if: github.event_name != 'pull_request' && env.NUGET_API_KEY == ''
-        run: echo "::warning::NUGET_API_KEY is not configured, so the package was packed but not published."

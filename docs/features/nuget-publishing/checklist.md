@@ -5,7 +5,7 @@ owner: @DreadBreadcrumb
 priority: high
 complexity: 2
 created: 2026-05-12
-updated: 2026-05-12
+updated: 2026-05-18
 tags: [checklist, nuget, publishing, core-models]
 ---
 
@@ -24,7 +24,7 @@ tags: [checklist, nuget, publishing, core-models]
 - [x] Add a GitHub Actions workflow for restore, test, pack, and publish.
 - [x] Use `1.0.2.<run_number>` for the next automated public package line.
 - [x] Install .NET 8, .NET 9, and .NET 10 in CI for the package target frameworks and tests.
-- [x] Keep CI green when `NUGET_API_KEY` is missing by warning after pack instead of failing the build.
+- [x] Fail the publish job on `main` when `NUGET_API_KEY` is missing so nuget.org publishing cannot be skipped silently.
 
 ## Release
 
@@ -33,9 +33,9 @@ tags: [checklist, nuget, publishing, core-models]
 - [x] Add `NUGET_API_KEY` to GitHub repository secrets.
 - [x] Push to `main`.
 - [x] Confirm GitHub Actions publish step receives `Created` from nuget.org.
-- [ ] Confirm the package appears in the nuget.org public flat-container index.
+- [x] Confirm the package appears in the nuget.org public flat-container index.
 
 ## Downstream
 
-- [ ] Update `chop-it` to use `PackageReference` after the new package is published.
+- [x] Update `chop-it` to use `PackageReference` after the new package is published.
 - [ ] Remove `Core.Models` checkout/build-context handling from downstream deployment workflows.

@@ -29,6 +29,22 @@ A .NET utility library providing common models, helpers, and reactive extensions
 | **Media** | `LocalMediaFile` | Shared model for local/NAS-backed media files |
 | | `MediaScanRoot` | Shared model for filesystem or NAS scan roots |
 | | `MediaTechnicalMetadata` | Shared technical metadata container for video/audio/image/ROM details |
+| | `MediaRelationshipKind` | Shared directional relationship kind enum |
+| | `MediaRelationshipEndpointKind` | Shared entity kind enum for relationship endpoints |
+| | `MediaRelationship` | Shared directional relationship model between catalog and asset entities |
+| | `MediaRelationshipEndpoint` | Shared entity reference used by media relationships |
+| | `MediaQueueItemState` | Shared lifecycle state for playback queue items |
+| | `MediaPlaybackQueueRequest` | Shared request for queueing media playback items |
+| | `MediaPlaybackQueue` | Shared playback queue snapshot |
+| | `ApiOperationResult` | Shared success/failure result envelope |
+| | `ApiOperationResult<T>` | Shared typed success/failure result envelope |
+| | `ApiReadinessSummary` | Shared readiness summary for operator surfaces |
+| | `PagedRequest` | Shared page-based query request contract |
+| | `PagedResult<T>` | Shared page-based response contract |
+| | `MediaScanProgress` | Shared scan-progress snapshot for media indexing jobs |
+| | `MediaScanSummary` | Shared scan summary for media indexing jobs |
+| | `MediaAssetReference` | Shared portable media asset reference model |
+| | `MediaProviderReference` | Shared portable external provider reference model |
 | | `MediaPlaylist` | Shared playlist/playout manifest for media, clipping, and broadcast consumers |
 | | `MediaPathHelpers` | Pure path, extension, and media-kind normalization helpers |
 | **Reactive** | `ObservableExtensions` | Custom reactive extensions for System.Reactive |
@@ -84,7 +100,7 @@ var obj = json.FromJson<MyType>();
 
 ### Install via NuGet
 ```xml
-<PackageReference Include="PolyhydraGames.Core.Models" Version="1.0.1.20" />
+<PackageReference Include="PolyhydraGames.Core.Models" Version="1.0.2.10" />
 ```
 
 The package is published publicly on nuget.org. New `main` builds publish `1.0.2.<run_number>` when the repository has a valid `NUGET_API_KEY` secret.
@@ -98,7 +114,7 @@ The package is published publicly on nuget.org. New `main` builds publish `1.0.2
 - .NET 8.0 and .NET 9.0 targeting packs for the library targets
 - The following NuGet packages are automatically resolved:
   - `PolyhydraGames.Core.Interfaces` (v2.0.0.45)
-  - `PolyhydraGames.Extensions` (v2.1.1.73)
+  - `PolyhydraGames.Extensions` (v2.1.1.78)
   - `System.Reactive` (v6.1.0)
 
 ### Building

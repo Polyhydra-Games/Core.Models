@@ -47,7 +47,7 @@ tags: [feature, checklist, media, Core.Models]
 - [x] Add extension normalization.
 - [x] Add relative-path normalization.
 - [x] Add extension-based media-kind classification.
-- [ ] Revisit extension lists after first downstream adoption pass.
+- [x] Revisit extension lists after first downstream adoption pass.
 
 ## Testing
 
@@ -57,12 +57,12 @@ tags: [feature, checklist, media, Core.Models]
 - [x] Cover JSON serialization round trip.
 - [x] Cover playlist manifest serialization and validation.
 - [x] Cover optional enrichment metadata round trip.
-- [ ] Add downstream mapping tests in consuming repos.
+- [x] Add downstream mapping tests in consuming repos.
 
 ## Release Readiness
 
 - [x] Repository tests pass.
 - [x] New public media API members have XML documentation.
-- [ ] Validate playlist shape in `chop-it` and `app-busey-box` before broad expansion.
-- [ ] Confirm package version/release notes before publishing.
-- [ ] Validate adoption in at least one downstream consumer before treating the contract as stable.
+- [x] Validate playlist shape in `chop-it` and `app-busey-box` before broad expansion.
+- [x] Confirm package version/release notes before publishing.
+- [x] Validate adoption in at least one downstream consumer before treating the contract as stable.

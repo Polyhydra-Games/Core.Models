@@ -88,7 +88,25 @@ public class MediaModelsTests
                 ImdbLink = "https://www.imdb.com/title/tt0051730/",
                 TvMazeLink = "https://www.tvmaze.com/",
                 PosterUrl = "https://example.com/poster.jpg",
-                BackdropUrl = "https://example.com/backdrop.jpg"
+                BackdropUrl = "https://example.com/backdrop.jpg",
+                Providers =
+                [
+                    new MediaProviderReference
+                    {
+                        ProviderKey = "tmdb",
+                        ExternalId = "12345",
+                        DisplayName = "The Movie Database",
+                        Url = "https://www.themoviedb.org/movie/12345",
+                        LastSeenAt = DateTimeOffset.Parse("2026-05-20T12:00:00Z"),
+                    },
+                    new MediaProviderReference
+                    {
+                        ProviderKey = "tvmaze",
+                        ExternalId = "67890",
+                        DisplayName = "TV Maze",
+                        Url = "https://www.tvmaze.com/shows/67890",
+                    }
+                ]
             }
         };
 
@@ -104,6 +122,9 @@ public class MediaModelsTests
         Assert.That(roundTrip.TechnicalMetadata.Audio!.Codec, Is.EqualTo("aac"));
         Assert.That(roundTrip.Enrichment!.Title, Is.EqualTo("Svengoolie - The Killer Shrews"));
         Assert.That(roundTrip.Enrichment.Provider, Is.EqualTo("tmdb"));
+        Assert.That(roundTrip.Enrichment.Providers, Has.Count.EqualTo(2));
+        Assert.That(roundTrip.Enrichment.Providers[0].ProviderKey, Is.EqualTo("tmdb"));
+        Assert.That(roundTrip.Enrichment.Providers[1].ExternalId, Is.EqualTo("67890"));
     }
 
     [Test]
@@ -243,6 +264,153 @@ public class MediaModelsTests
         Assert.That(roundTrip.Items[0].Media!.MediaFileId, Is.EqualTo("nas:123"));
         Assert.That(playable, Has.Count.EqualTo(1));
         Assert.That(MediaPlaylistHelpers.Validate(roundTrip).IsValid, Is.True);
+    }
+
+    [Test]
+    public void MediaAssetReference_SerializesAndDeserializesSharedShape()
+    {
+        var reference = new MediaAssetReference
+        {
+            AssetId = "poster:the-blob",
+            Title = "The Blob Poster",
+            Description = "Poster art for the 1958 release",
+            Kind = MediaAssetReferenceKind.Poster,
+            Role = "poster",
+            Url = "https://cdn.example.com/posters/the-blob.jpg",
+            SourceId = "tmdb:12345",
+            SourceName = "TMDb",
+            Location = new MediaFileLocation
+            {
+                RootId = "cdn",
+                RootName = "CDN",
+                RelativePath = "posters/the-blob.jpg",
+                PublicUrl = "https://cdn.example.com/posters/the-blob.jpg"
+            },
+            Metadata = new Dictionary<string, string>
+            {
+                ["license"] = "public-domain",
+                ["provider"] = "tmdb",
+            }
+        };
+
+        var json = JsonSerializer.Serialize(reference);
+        var roundTrip = JsonSerializer.Deserialize<MediaAssetReference>(json);
+
+        Assert.That(roundTrip, Is.Not.Null);
+        Assert.That(roundTrip!.AssetId, Is.EqualTo("poster:the-blob"));
+        Assert.That(roundTrip.Kind, Is.EqualTo(MediaAssetReferenceKind.Poster));
+        Assert.That(roundTrip.Role, Is.EqualTo("poster"));
+        Assert.That(roundTrip.Location!.RelativePath, Is.EqualTo("posters/the-blob.jpg"));
+        Assert.That(roundTrip.Metadata["license"], Is.EqualTo("public-domain"));
+        Assert.That(roundTrip.Metadata["provider"], Is.EqualTo("tmdb"));
+    }
+
+    [Test]
+    public void MediaProviderReference_SerializesAndDeserializesSharedShape()
+    {
+        var reference = new MediaProviderReference
+        {
+            ProviderKey = "tmdb",
+            ExternalId = "12345",
+            DisplayName = "The Movie Database",
+            Url = "https://www.themoviedb.org/movie/12345",
+            LastSeenAt = DateTimeOffset.Parse("2026-05-20T12:00:00Z"),
+            Metadata = new Dictionary<string, string>
+            {
+                ["region"] = "US",
+                ["priority"] = "primary",
+            }
+        };
+
+        var json = JsonSerializer.Serialize(reference);
+        var roundTrip = JsonSerializer.Deserialize<MediaProviderReference>(json);
+
+        Assert.That(roundTrip, Is.Not.Null);
+        Assert.That(roundTrip!.ProviderKey, Is.EqualTo("tmdb"));
+        Assert.That(roundTrip.ExternalId, Is.EqualTo("12345"));
+        Assert.That(roundTrip.DisplayName, Is.EqualTo("The Movie Database"));
+        Assert.That(roundTrip.Metadata["region"], Is.EqualTo("US"));
+        Assert.That(roundTrip.Metadata["priority"], Is.EqualTo("primary"));
+    }
+
+    [Test]
+    public void MediaRelationship_SerializesAndDeserializesSharedShape()
+    {
+        var relationships = new[]
+        {
+            new MediaRelationship
+            {
+                RelationshipId = "rel:episode-video",
+                Kind = MediaRelationshipKind.EpisodeOf,
+                Role = "episode-video",
+                Source = new MediaRelationshipEndpoint
+                {
+                    EntityId = "catalog:svengoolie-episode-20",
+                    Kind = MediaRelationshipEndpointKind.CatalogItem,
+                    Label = "The Killer Shrews"
+                },
+                Target = new MediaRelationshipEndpoint
+                {
+                    EntityId = "media:nas:123",
+                    Kind = MediaRelationshipEndpointKind.MediaFile,
+                    Label = "Svengoolie - The Killer Shrews [S02E20].mp4",
+                    RelativePath = "TV Shows/Svengoolie/Svengoolie - The Killer Shrews [S02E20].mp4"
+                },
+                Metadata = new Dictionary<string, string>
+                {
+                    ["source"] = "svengoolie",
+                }
+            },
+            new MediaRelationship
+            {
+                RelationshipId = "rel:show-poster",
+                Kind = MediaRelationshipKind.PosterFor,
+                Source = new MediaRelationshipEndpoint
+                {
+                    EntityId = "catalog:svengoolie",
+                    Kind = MediaRelationshipEndpointKind.CatalogItem,
+                    Label = "Svengoolie"
+                },
+                Target = new MediaRelationshipEndpoint
+                {
+                    EntityId = "asset:poster:the-killer-shrews",
+                    Kind = MediaRelationshipEndpointKind.MediaAsset,
+                    Label = "The Killer Shrews Poster",
+                    Url = "https://cdn.example.com/posters/the-killer-shrews.jpg"
+                }
+            },
+            new MediaRelationship
+            {
+                RelationshipId = "rel:rom-box-art",
+                Kind = MediaRelationshipKind.BoxArtFor,
+                Source = new MediaRelationshipEndpoint
+                {
+                    EntityId = "rom:metroid",
+                    Kind = MediaRelationshipEndpointKind.MediaFile,
+                    Label = "Metroid.sfc"
+                },
+                Target = new MediaRelationshipEndpoint
+                {
+                    EntityId = "asset:box-art:metroid",
+                    Kind = MediaRelationshipEndpointKind.MediaAsset,
+                    Label = "Metroid Box Art",
+                    Url = "https://cdn.example.com/box-art/metroid.png"
+                }
+            }
+        };
+
+        var json = JsonSerializer.Serialize(relationships);
+        var roundTrip = JsonSerializer.Deserialize<MediaRelationship[]>(json);
+
+        Assert.That(roundTrip, Is.Not.Null);
+        Assert.That(roundTrip, Has.Length.EqualTo(3));
+        Assert.That(roundTrip![0].Kind, Is.EqualTo(MediaRelationshipKind.EpisodeOf));
+        Assert.That(roundTrip[0].Source.Kind, Is.EqualTo(MediaRelationshipEndpointKind.CatalogItem));
+        Assert.That(roundTrip[0].Target.RelativePath, Is.EqualTo("TV Shows/Svengoolie/Svengoolie - The Killer Shrews [S02E20].mp4"));
+        Assert.That(roundTrip[1].Kind, Is.EqualTo(MediaRelationshipKind.PosterFor));
+        Assert.That(roundTrip[1].Target.Kind, Is.EqualTo(MediaRelationshipEndpointKind.MediaAsset));
+        Assert.That(roundTrip[2].Kind, Is.EqualTo(MediaRelationshipKind.BoxArtFor));
+        Assert.That(roundTrip[2].Target.Url, Is.EqualTo("https://cdn.example.com/box-art/metroid.png"));
     }
 
     [Test]

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace PolyhydraGames.Core.Models.Media;
 
 /// <summary>
@@ -59,4 +61,9 @@ public sealed record MediaEnrichmentMetadata
     /// Backdrop art URL when available.
     /// </summary>
     public string? BackdropUrl { get; init; }
+
+    /// <summary>
+    /// Optional portable references to external provider records for the media item.
+    /// </summary>
+    public IReadOnlyList<MediaProviderReference> Providers { get; init; } = [];
 }

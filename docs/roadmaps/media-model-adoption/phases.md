@@ -15,22 +15,22 @@ tags: [roadmap, phases, media, Core.Models]
 - [x] Add focused helper and serialization tests.
 - [x] Document the feature boundary.
 - [x] Add first portable playlist/playout contracts.
-- [ ] Resolve `Rom` versus `GameRom` naming.
-- [ ] Decide whether checksum algorithm belongs in the model.
+- [x] Resolve `Rom` versus `GameRom` naming. Keep `Rom` for compatibility with current downstream consumers.
+- [x] Decide whether checksum algorithm belongs in the model. Keep the checksum as a string field for now.
 
 ## Phase 2: First Consumer
 
 - [ ] Pick first downstream repo.
 - [ ] Add mapping extensions in the downstream repo.
-- [ ] Map `chop-it` playlist output into `MediaPlaylist`.
-- [ ] Map `app-busey-box` manifests into `MediaPlaylist`.
-- [ ] Add mapping tests with realistic data.
+- [x] Map `chop-it` playlist output into `MediaPlaylist`.
+- [x] Map `app-busey-box` manifests into `MediaPlaylist`.
+- [x] Add mapping tests with realistic data.
 - [ ] Capture any model gaps back in `docs/features/media-models/roadmap.md`.
 
 ## Phase 3: Catalog And CDN Adoption
 
 - [ ] Map catalog media assets to shared location fields.
-- [ ] Audit CDN records for reusable location/path concepts.
+- [x] Audit CDN records for reusable location/path concepts. Current CDN file descriptors stay delivery-specific; no shared location shape was promoted yet.
 - [ ] Verify URL/path boundaries are still safe.
 - [ ] Add documentation for app-specific ownership.
 

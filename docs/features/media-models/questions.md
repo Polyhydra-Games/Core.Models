@@ -9,9 +9,9 @@ tags: [feature, questions, media, Core.Models]
 
 # Media Models Questions
 
-- [ ] Should `MediaKind.Rom` be renamed to `GameRom` before broad adoption?
+- [x] Should `MediaKind.Rom` be renamed to `GameRom` before broad adoption? No. Keep `Rom` for compatibility with current downstream consumers and extension helpers.
 - [x] Should playlist models live in `Core.Models.Media.Playlists`, in `chop-it`, or in another shared package?
-- [ ] Should checksum metadata include an algorithm field?
+- [x] Should checksum metadata include an algorithm field? No. Keep the checksum as an owning-app string until a real downstream consumer needs an algorithm field.
 - [ ] Should subtitle sidecar files stay under `Document`, or should subtitles become a first-class media kind?
 - [ ] Which downstream repo should be the first adoption target: `core.nas`, `SvengoolieDB`, or `chop-it`?
 - [ ] Should playlist source fields stay generic, or should a future model reference `MediaScanRoot` directly?
