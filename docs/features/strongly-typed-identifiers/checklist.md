@@ -3,7 +3,7 @@ title: Strongly Typed Identifiers Checklist
 status: in-progress
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-05-30
 tags: [feature, checklist, identifiers, Core.Models]
 ---
 
@@ -52,5 +52,5 @@ tags: [feature, checklist, identifiers, Core.Models]
 
 - [x] Document first consumer in `OAuth.Core`.
 - [x] Document first consumer in streaming-facing contracts.
-- [ ] Decide whether concrete shared IDs move now or only base patterns move first.
+- [x] Decide whether concrete shared IDs move now or only base patterns move first: only base/converter patterns move now; concrete IDs stay downstream until ownership and consumer tests are clear.
 - [ ] Update package version/release notes before publishing.

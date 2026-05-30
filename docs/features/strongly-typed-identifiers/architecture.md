@@ -3,7 +3,7 @@ title: Strongly Typed Identifiers Architecture
 status: in-progress
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-05-30
 tags: [feature, architecture, identifiers, Core.Models]
 ---
 
@@ -12,6 +12,8 @@ tags: [feature, architecture, identifiers, Core.Models]
 ## Boundary
 
 `Core.Models` owns reusable identifier contracts, converters, and helper methods. It does not own app-specific identity storage, OAuth flows, platform clients, token handling, database persistence, or routing logic.
+
+The current migration boundary is intentionally limited to reusable base/converter patterns. Concrete IDs remain downstream until ownership is shared and consumer compatibility is proven.
 
 ## Namespace
 
@@ -106,8 +108,9 @@ options.Converters.Add(new StronglyTypedIdJsonConverterFactory());
 
 ## Migration Rules
 
-- [ ] Move the reusable pattern first.
-- [ ] Migrate concrete IDs only when ownership is clear.
-- [ ] Keep downstream package compatibility until consumers have switched references.
-- [ ] Add downstream tests before deleting old ID implementations.
-- [ ] Prefer explicit casts from strings and primitives where accidental cross-type conversion would be risky.
+- [x] Move the reusable pattern first.
+- [x] Migrate concrete IDs only when ownership is clear.
+- [x] Keep downstream package compatibility until consumers have switched references.
+- [x] Add downstream tests before deleting old ID implementations.
+- [x] Prefer explicit casts from strings and primitives where accidental cross-type conversion would be risky.
+- [x] Do not move `IdentityId`, `UserId`, `WebKey`, `TwitchId`, or `ChannelKey` in the first pass; downstream packages should wrap those IDs with the shared contracts/converters first.

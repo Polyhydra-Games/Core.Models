@@ -3,7 +3,7 @@ title: Strongly Typed Identifiers Implementation Notes
 status: in-progress
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-05-30
 tags: [feature, implementation, identifiers, Core.Models]
 ---
 
@@ -40,8 +40,15 @@ tags: [feature, implementation, identifiers, Core.Models]
 
 ## Migration Notes
 
-- [ ] `IdentityId.New()` in the source example should return `IdentityId`, not `UserId`.
-- [ ] `IdentityId` error messages should say `IdentityId`, not `UserId`.
-- [ ] Existing `UserId`, `WebKey`, `TwitchId`, and `IdentityId` should migrate one at a time with downstream tests.
+- [x] `IdentityId.New()` in the source example should return `IdentityId`, not `UserId`.
+- [x] `IdentityId` error messages should say `IdentityId`, not `UserId`.
+- [x] Existing `UserId`, `WebKey`, `TwitchId`, and `IdentityId` should migrate one at a time with downstream tests.
 - [ ] Dapper or EF type handlers should stay downstream unless at least two repos need the same helper shape.
-- [ ] Avoid changing JSON payload shape during migration.
+- [x] Avoid changing JSON payload shape during migration.
+
+## Concrete ID Boundary
+
+- [x] Current `Core.Models` migration scope is the reusable identifier base/converter surface only.
+- [x] Concrete IDs remain in downstream packages in the first pass.
+- [x] A concrete ID can move into `Core.Models` only after the owning domain is shared across repos, at least one downstream consumer is named, JSON compatibility is covered by tests, and release notes call out the public contract move.
+- [x] Downstream migrations should add the shared interface/converter pattern around the existing ID first, then remove duplicated local helpers only after all callers reference the package version that contains the shared pattern.

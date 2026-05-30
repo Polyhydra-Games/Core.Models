@@ -3,7 +3,7 @@ title: Shared Model Contracts Roadmap
 status: planned
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-20
+updated: 2026-05-30
 tags: [roadmap, Core.Models, shared-contracts, media, api-models]
 ---
 
@@ -48,8 +48,8 @@ This roadmap is intentionally contract-first. `Core.Models` should own stable DT
 - [x] Import the reusable ID pattern from `OAuth.Core` and streaming-facing contracts.
 - [x] Support GUID-backed, string-backed, int-backed, and long-backed ID types.
 - [x] Include JSON converters and parse/try-parse helpers.
-- [ ] Keep OAuth flow, PKCE, token handling, and platform clients outside `Core.Models`.
-- [ ] Decide whether concrete IDs like `IdentityId`, `UserId`, `WebKey`, and `TwitchId` move here or downstream packages only consume the shared base pattern.
+- [x] Keep OAuth flow, PKCE, token handling, and platform clients outside `Core.Models`.
+- [x] Decide whether concrete IDs like `IdentityId`, `UserId`, `WebKey`, and `TwitchId` move here or downstream packages only consume the shared base pattern: only the shared base/converter pattern moves now; concrete IDs remain downstream until ownership, compatibility tests, and release notes are ready.
 
 ### Media Asset References
 

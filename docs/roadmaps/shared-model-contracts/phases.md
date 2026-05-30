@@ -3,7 +3,7 @@ title: Shared Model Contracts Phases
 status: planned
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-20
+updated: 2026-05-30
 tags: [roadmap, phases, Core.Models, shared-contracts]
 ---
 
@@ -28,6 +28,7 @@ tags: [roadmap, phases, Core.Models, shared-contracts]
 - [x] Add JSON converter strategy.
 - [x] Add equality, conversion, invalid input, and round-trip tests.
 - [x] Document migration path for `OAuth.Core`, `UserId`, `WebKey`, `TwitchId`, and proposed `IdentityId`.
+- [x] Document first-pass migration boundary: reusable base/converter patterns move now; concrete IDs remain downstream until ownership and consumer compatibility are clear.
 
 ## Phase 2: Media Asset References
 

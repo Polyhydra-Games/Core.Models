@@ -5,7 +5,7 @@ owner: @DreadBreadcrumb
 priority: high
 complexity: 3
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-05-30
 tags: [feature, Core.Models, identifiers, value-objects, shared-contracts]
 ---
 
@@ -17,13 +17,19 @@ Create reusable strongly typed identifier contracts and base patterns in `Core.M
 
 This feature should export the reusable pattern, converters, and tests. App-specific identifier names may still live in downstream packages when their domain ownership is not shared.
 
+## Migration Boundary Decision
+
+The current migration boundary is **base/converter patterns only**. `Core.Models` owns `IStronglyTypedId<TValue>`, the GUID/string/optional-string/int/long helper contracts, parse/create helpers, and JSON converter/factory patterns. It does not move concrete downstream IDs in this slice.
+
+Concrete IDs such as `IdentityId`, `UserId`, `WebKey`, `TwitchId`, and `ChannelKey` stay in their owning downstream packages until each type has clear cross-repo ownership, a named first consumer, compatibility tests, and release notes. Downstream repos should adopt the shared pattern one ID at a time without changing JSON payload shape or deleting existing implementations before consumers have switched references.
+
 ## Current Source Signals
 
 - [x] `OAuth.Core` uses `IStrongId<TSelf>` as a lightweight ID interface.
 - [x] `OAuth.Core` and streaming-facing contracts use strongly typed IDs such as `UserId`, `WebKey`, `TwitchId`, and `ChannelKey`.
 - [x] `PolyhydraGames.Streaming.Interfaces` already has GUID-backed and string-backed ID examples.
 - [x] `Core.Models` now owns reusable ID interfaces and JSON converters for strongly typed identifiers.
-- [ ] The current examples are split across packages, which makes reuse harder.
+- [x] The current examples are split across packages, so `Core.Models` exports reusable patterns while concrete IDs remain downstream until ownership is clear.
 
 ## Candidate Contract Shape
 
@@ -74,15 +80,15 @@ Long-backed IDs:
 
 - [x] Fix copied-template mistakes before implementation. The proposed `IdentityId.New()` example currently returns `UserId`; it should return `IdentityId`.
 - [x] Fix copied error messages before implementation. `IdentityId` errors should not say `UserId`.
-- [ ] Preserve compatibility for existing downstream IDs until callers migrate.
-- [ ] Prefer adding shared base/converter patterns first, then move concrete IDs only when ownership is clear.
+- [x] Preserve compatibility for existing downstream IDs until callers migrate.
+- [x] Prefer adding shared base/converter patterns first, then move concrete IDs only when ownership is clear.
 - [x] Preserve the streaming-facing optional string ID policy without forcing it onto all string-backed IDs.
 
 ## Non-Goals
 
-- [ ] Do not move OAuth token flow, PKCE, auth config, token encryption, or service abstractions into `Core.Models`.
-- [ ] Do not move streaming platform API clients into `Core.Models`.
-- [ ] Do not force all existing IDs to move in the first pass.
+- [x] Do not move OAuth token flow, PKCE, auth config, token encryption, or service abstractions into `Core.Models`.
+- [x] Do not move streaming platform API clients into `Core.Models`.
+- [x] Do not force all existing IDs to move in the first pass.
 
 ## Success Criteria
 
