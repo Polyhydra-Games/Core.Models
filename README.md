@@ -2,6 +2,23 @@
 
 A .NET utility library providing common models, helpers, and reactive extensions for the PolyhydraGames ecosystem.
 
+## Tags
+
+- dotnet
+- core
+- core-models
+- auth
+- docs
+- models
+
+## Related Repos
+
+- [`Core`](../Core/)
+- [`Core.Interfaces`](../Core.Interfaces/)
+- [`Core.Extensions`](../Core.Extensions/)
+- [`Core.Serialization`](../Core.Serialization/)
+- [`Core.SQL`](../Core.SQL/)
+
 ## What This Library Provides
 
 `PolyhydraGames.Core.Models` is a shared utility library containing common DTOs, caching, serialization helpers, and reactive extensions used across multiple projects. It eliminates duplication by centralizing frequently-needed model types and helpers.
