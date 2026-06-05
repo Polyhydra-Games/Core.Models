@@ -5,11 +5,15 @@ owner: @DreadBreadcrumb
 priority: high
 complexity: 2
 created: 2026-05-12
-updated: 2026-05-18
+updated: 2026-06-03
 tags: [feature, nuget, publishing, core-models]
 ---
 
 # Public NuGet Publishing
+
+## Hermes Status
+
+Hermes Kanban: pending promotion — canonical family anchor; checklist and sibling docs point here.
 
 ## Summary
 

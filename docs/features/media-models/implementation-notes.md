@@ -3,7 +3,7 @@ title: Media Models Implementation Notes
 status: in-progress
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-06
+updated: 2026-06-03
 tags: [feature, implementation, media, Core.Models]
 ---
 
@@ -30,6 +30,13 @@ tags: [feature, implementation, media, Core.Models]
 - [x] `MediaPlaylist_SupportsChopItSegmentOptionsAndEmbeddedMedia`
 - [x] `MediaPlaylistHelpers_ReportsShapeErrors`
 - [x] `LocalMediaFile_SerializesAndDeserializesSharedShape` now includes enrichment metadata.
+
+## Validation Commands
+
+```bash
+dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release
+dotnet build PolyhydraGames.Core.Models.sln --no-restore --configuration Release
+```
 
 ## Cleanup Notes
 

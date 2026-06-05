@@ -5,11 +5,15 @@ owner: @DreadBreadcrumb
 priority: high
 complexity: 3
 created: 2026-05-04
-updated: 2026-05-30
+updated: 2026-06-03
 tags: [feature, Core.Models, identifiers, value-objects, shared-contracts]
 ---
 
 # Strongly Typed Identifiers
+
+## Hermes Status
+
+Hermes Kanban: pending promotion — canonical family anchor; checklist and sibling docs point here.
 
 ## Summary
 

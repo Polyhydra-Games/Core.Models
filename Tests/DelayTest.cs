@@ -7,11 +7,11 @@ namespace PolyhydraGames.Core.Models.Test;
 [TestFixture]
 public class DelayTest
 {
-
     [SetUp]
     public void Setup()
     {
     }
+
     [Test]
     public async Task TestNestedExceptions()
     {
@@ -28,6 +28,30 @@ public class DelayTest
         {
             Assert.Pass(ex.Message);
         }
+
         Assert.Fail("The error never threw");
+    }
+
+    [Test]
+    public async Task TestMaximumDurationBoundaryDoesNotOvershoot()
+    {
+        MaximumDurationException? caught = null;
+        var timer = new DelayedTimer("Test", 1, 1, 2);
+
+        try
+        {
+            for (var x = 0; x < 4; x++)
+            {
+                await timer.Delay();
+            }
+        }
+        catch (MaximumDurationException ex)
+        {
+            caught = ex;
+        }
+
+        Assert.That(caught, Is.Not.Null);
+        Assert.That(caught!.State.CurrentDelay, Is.EqualTo(2));
+        Assert.That(caught.Message, Does.Not.Contain("3"));
     }
 }

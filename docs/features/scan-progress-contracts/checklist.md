@@ -3,11 +3,15 @@ title: Scan Progress Contracts Checklist
 status: active
 owner: @DreadBreadcrumb
 created: 2026-05-20
-updated: 2026-05-20
+updated: 2026-06-03
 tags: [feature, checklist, Core.Models, scan, progress]
 ---
 
 # Scan Progress Contracts Checklist
+
+## Canonical Anchor
+
+Canonical doc: [README](./README.md). This checklist mirrors the canonical family status and does not carry a separate Hermes marker.
 
 ## Discovery
 

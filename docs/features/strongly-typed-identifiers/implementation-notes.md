@@ -3,7 +3,7 @@ title: Strongly Typed Identifiers Implementation Notes
 status: in-progress
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-30
+updated: 2026-06-03
 tags: [feature, implementation, identifiers, Core.Models]
 ---
 
@@ -37,6 +37,13 @@ tags: [feature, implementation, identifiers, Core.Models]
 - [x] Long-backed helper parse/try-parse.
 - [x] Converter factory registration for attribute-free ID structs.
 - [x] Unsupported backing type rejection.
+
+## Validation Commands
+
+```bash
+dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release
+dotnet build PolyhydraGames.Core.Models.sln --no-restore --configuration Release
+```
 
 ## Migration Notes
 

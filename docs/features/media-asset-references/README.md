@@ -3,11 +3,15 @@ title: Media Asset References
 status: active
 owner: @DreadBreadcrumb
 created: 2026-05-20
-updated: 2026-05-20
+updated: 2026-06-03
 tags: [feature, Core.Models, media, references, contracts]
 ---
 
 # Media Asset References
+
+## Hermes Status
+
+Hermes Kanban: pending promotion — canonical family anchor; checklist and sibling docs point here.
 
 ## Summary
 

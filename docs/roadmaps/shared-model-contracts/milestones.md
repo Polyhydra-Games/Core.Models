@@ -3,11 +3,15 @@ title: Shared Model Contracts Milestones
 status: planned
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-20
+updated: 2026-06-03
 tags: [roadmap, milestones, Core.Models, shared-contracts]
 ---
 
 # Shared Model Contracts Milestones
+
+## Canonical Anchor
+
+Canonical doc: [README](./README.md). This file is supporting detail for the roadmap’s canonical Hermes anchor in README.md.
 
 ## M1: Contract Boundary Documented
 

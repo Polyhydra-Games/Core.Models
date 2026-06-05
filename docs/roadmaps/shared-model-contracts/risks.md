@@ -3,11 +3,15 @@ title: Shared Model Contracts Risks
 status: planned
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-06-03
 tags: [roadmap, risks, Core.Models, shared-contracts]
 ---
 
 # Shared Model Contracts Risks
+
+## Canonical Anchor
+
+Canonical doc: [README](./README.md). This file is supporting detail for the roadmap’s canonical Hermes anchor in README.md.
 
 ## Identifier Compatibility
 

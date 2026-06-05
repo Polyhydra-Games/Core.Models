@@ -3,11 +3,15 @@ title: Scan Progress Contracts
 status: active
 owner: @DreadBreadcrumb
 created: 2026-05-20
-updated: 2026-05-20
+updated: 2026-06-03
 tags: [feature, Core.Models, media, scan, progress, contracts]
 ---
 
 # Scan Progress Contracts
+
+## Hermes Status
+
+Hermes Kanban: pending promotion — canonical family anchor; checklist and sibling docs point here.
 
 ## Summary
 

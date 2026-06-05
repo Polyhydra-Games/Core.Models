@@ -3,11 +3,15 @@ title: Strongly Typed Identifiers Checklist
 status: in-progress
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-30
+updated: 2026-06-03
 tags: [feature, checklist, identifiers, Core.Models]
 ---
 
 # Strongly Typed Identifiers Checklist
+
+## Canonical Anchor
+
+Canonical doc: [README](./README.md). This checklist mirrors the canonical family status and does not carry a separate Hermes marker.
 
 ## Discovery
 

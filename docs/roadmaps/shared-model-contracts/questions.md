@@ -3,11 +3,15 @@ title: Shared Model Contracts Questions
 status: open
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-30
+updated: 2026-06-03
 tags: [roadmap, questions, Core.Models, shared-contracts]
 ---
 
 # Shared Model Contracts Questions
+
+## Canonical Anchor
+
+Canonical doc: [README](./README.md). This file is supporting detail for the roadmap’s canonical Hermes anchor in README.md.
 
 - [x] Should strongly typed identifiers move as concrete IDs, reusable base patterns, or both? Reusable base/converter patterns move now; concrete IDs stay downstream until ownership and compatibility are proven.
 - [x] Should GUID-backed IDs always reject `Guid.Empty`, or should each ID type decide? Each concrete ID type decides; shared converters preserve the constructor policy.

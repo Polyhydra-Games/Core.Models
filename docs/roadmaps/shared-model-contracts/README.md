@@ -3,11 +3,15 @@ title: Shared Model Contracts Roadmap
 status: planned
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-30
+updated: 2026-06-03
 tags: [roadmap, Core.Models, shared-contracts, media, api-models]
 ---
 
 # Shared Model Contracts Roadmap
+
+## Hermes Status
+
+Hermes Kanban: pending promotion — blocked on package-boundary and versioning decisions; see questions.md before promotion.
 
 ## Purpose
 

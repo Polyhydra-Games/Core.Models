@@ -5,11 +5,15 @@ owner: @DreadBreadcrumb
 priority: high
 complexity: 2
 created: 2026-05-12
-updated: 2026-05-18
+updated: 2026-06-03
 tags: [checklist, nuget, publishing, core-models]
 ---
 
 # Public NuGet Publishing Checklist
+
+## Canonical Anchor
+
+Canonical doc: [README](./README.md). This checklist mirrors the canonical family status and does not carry a separate Hermes marker.
 
 ## Discovery
 

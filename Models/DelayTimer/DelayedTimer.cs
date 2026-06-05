@@ -35,12 +35,16 @@ public class DelayedTimer
         }
 
         CTS = new CancellationTokenSource();
-        CurrentDelay += Step;
-        if (CurrentDelay > MaxDelay)
+        var nextDelay = CurrentDelay + Step;
+        if (nextDelay > MaxDelay)
         {
-            await CTS.CancelAsync();
+            CurrentDelay = MaxDelay;
+            CTS.Dispose();
+            CTS = default;
             throw new MaximumDurationException(this);
         }
+
+        CurrentDelay = nextDelay;
 
         try
         {
@@ -48,7 +52,7 @@ public class DelayedTimer
             CTS.Dispose();
             CTS = default;
         }
-        catch (Exception ex)
+        catch
         {
             Reset();
             throw;

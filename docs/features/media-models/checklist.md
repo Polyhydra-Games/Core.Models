@@ -3,11 +3,15 @@ title: Media Models Checklist
 status: in-progress
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-05-06
+updated: 2026-06-03
 tags: [feature, checklist, media, Core.Models]
 ---
 
 # Media Models Checklist
+
+## Canonical Anchor
+
+Canonical doc: [README](./README.md). This checklist mirrors the canonical family status and does not carry a separate Hermes marker.
 
 ## Discovery
 
