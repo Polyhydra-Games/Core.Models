@@ -3,15 +3,11 @@ title: Queue and Request Contracts
 status: active
 owner: @DreadBreadcrumb
 created: 2026-05-20
-updated: 2026-06-03
+updated: 2026-05-20
 tags: [feature, Core.Models, media, queue, requests, contracts]
 ---
 
 # Queue and Request Contracts
-
-## Hermes Status
-
-Hermes Kanban: pending promotion — canonical family anchor; checklist and sibling docs point here.
 
 ## Summary
 

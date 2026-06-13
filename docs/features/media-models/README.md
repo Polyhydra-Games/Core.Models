@@ -5,7 +5,7 @@ owner: @DreadBreadcrumb
 priority: high
 complexity: 2
 created: 2026-05-04
-updated: 2026-06-03
+updated: 2026-05-20
 tags: [feature, Core.Models, media, local-files, shared-models]
 ---
 

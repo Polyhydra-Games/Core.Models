@@ -3,15 +3,11 @@ title: Model Contract Stability
 status: active
 owner: @DreadBreadcrumb
 created: 2026-05-20
-updated: 2026-06-03
+updated: 2026-05-20
 tags: [feature, documentation, Core.Models, contracts]
 ---
 
 # Model Contract Stability
-
-## Hermes Status
-
-Hermes Kanban: pending promotion — canonical family anchor; checklist and sibling docs point here.
 
 ## Summary
 

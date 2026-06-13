@@ -5,7 +5,7 @@ owner: @DreadBreadcrumb
 priority: high
 complexity: 2
 created: 2026-05-12
-updated: 2026-06-03
+updated: 2026-05-18
 tags: [checklist, nuget, publishing, core-models]
 ---
 

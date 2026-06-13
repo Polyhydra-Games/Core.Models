@@ -3,15 +3,11 @@ title: Queue and Request Contracts Checklist
 status: active
 owner: @DreadBreadcrumb
 created: 2026-05-20
-updated: 2026-06-03
+updated: 2026-05-20
 tags: [feature, checklist, Core.Models, queue, requests]
 ---
 
 # Queue and Request Contracts Checklist
-
-## Canonical Anchor
-
-Canonical doc: [README](./README.md). This checklist mirrors the canonical family status and does not carry a separate Hermes marker.
 
 ## Discovery
 

@@ -3,7 +3,7 @@ title: Shared Model Contracts Phases
 status: planned
 owner: @DreadBreadcrumb
 created: 2026-05-04
-updated: 2026-06-03
+updated: 2026-05-20
 tags: [roadmap, phases, Core.Models, shared-contracts]
 ---
 
