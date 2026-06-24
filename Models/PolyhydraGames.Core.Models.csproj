@@ -27,7 +27,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="../../Core.Interfaces/Interfaces/PolyhydraGames.Core.Interfaces.csproj" />
-		<PackageReference Include="PolyhydraGames.Extensions" Version="2.1.1.79" />
+		<PackageReference Include="PolyhydraGames.Extensions" Version="2.1.1.78" />
 		<PackageReference Include="System.Reactive" Version="6.1.0" />
 	</ItemGroup>
 
