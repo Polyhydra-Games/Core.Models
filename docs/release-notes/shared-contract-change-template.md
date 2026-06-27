@@ -29,3 +29,9 @@ Use this template for any shared model, identifier, enum, serialization helper, 
 - Advisory command:
 - Downstream consumer command:
 - Evidence link or issue comment:
+
+## Version Classification
+
+- Patch, minor, or breaking:
+- Reason:
+- Consumer migration issue, if required:

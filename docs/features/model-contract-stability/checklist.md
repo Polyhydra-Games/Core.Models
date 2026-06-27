@@ -3,7 +3,7 @@ title: Model Contract Stability Checklist
 status: active
 owner: @DreadBreadcrumb
 created: 2026-05-20
-updated: 2026-05-20
+updated: 2026-06-27
 tags: [feature, checklist, Core.Models, contracts]
 ---
 
@@ -26,9 +26,9 @@ tags: [feature, checklist, Core.Models, contracts]
 
 - [x] Confirm current shared-model adoption via `core.nas`, `SvengoolieDB`, `chop-it`, and `app-busey-box`.
 - [x] Confirm the current shared media contracts still serialize and round-trip cleanly.
-- [ ] Add release-note guidance for future breaking contract families.
+- [x] Add release-note guidance for future breaking contract families.
 
 ## Follow-Up
 
-- [ ] Add a reusable compatibility template if more shared contract families land.
-- [ ] Add a package/version policy note for future shared-model releases.
+- [x] Add a reusable compatibility template if more shared contract families land.
+- [x] Add a package/version policy note for future shared-model releases.
