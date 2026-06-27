@@ -21,18 +21,18 @@
 - Data model changes can have downstream impact without documented migration notes.
 
 ## V1 (stability)
-- [ ] Link model feature changes to explicit test files and scenarios.
-- [ ] Add deterministic migration/check list for model shape changes.
-- [ ] Add release gate for `README`/feature updates when model behavior shifts.
-- [ ] Add examples for backward-compatible model updates.
+- [x] Link model feature changes to explicit test files and scenarios.
+- [x] Add deterministic migration/check list for model shape changes.
+- [x] Add release gate for `README`/feature updates when model behavior shifts.
+- [x] Add examples for backward-compatible model updates.
 - [x] Establish shared-contract import criteria in `docs/roadmaps/shared-model-contracts/`.
 
 ## V2 (confidence)
 - [ ] Expand test coverage for common model edge cases and fallbacks.
-- [ ] Add compatibility matrix for consumers and serialization formats.
-- [ ] Add clear operator guidance for CI and pipeline validation.
-- [ ] Add changelog discipline for breaking model changes.
-- [ ] Validate at least one new shared contract family in a downstream repo before marking it stable.
+- [x] Add compatibility matrix for consumers and serialization formats.
+- [x] Add clear operator guidance for CI and pipeline validation.
+- [x] Add changelog discipline for breaking model changes.
+- [x] Validate at least one new shared contract family in a downstream repo before marking it stable.
 
 ## V10 (scale)
 - [ ] Formalize model contract policy across org-core packages.
@@ -41,6 +41,6 @@
 - [ ] Add support policy for migration and deprecation across major versions.
 
 ## Readiness checklist
-- [ ] Any model change has paired docs and validation.
-- [ ] Test coverage includes schema and serialization behavior.
-- [ ] Release notes include compatibility impact.
+- [x] Any model change has paired docs and validation.
+- [x] Test coverage includes schema and serialization behavior.
+- [x] Release notes include compatibility impact.

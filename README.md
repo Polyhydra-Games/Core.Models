@@ -137,11 +137,24 @@ The package is published publicly on nuget.org. New `main` builds publish `1.0.2
 ### Building
 ```bash
 # Build the solution
-dotnet build PolyhydraGames.Core.Models.sln
+dotnet build PolyhydraGames.Core.Models.sln --configuration Release
 
 # Run tests
-dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj
+dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --configuration Release
+
+# Pack the shared contract package
+dotnet pack Models/PolyhydraGames.Core.Models.csproj --configuration Release --no-restore --output artifacts/packages
 ```
+
+### Release Gates
+
+Shared contract changes must pass the local package validation and at least one downstream consumer validation before they are considered stable.
+
+- Local tests: `dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --configuration Release`.
+- Package build: `dotnet pack Models/PolyhydraGames.Core.Models.csproj --configuration Release --no-restore --output artifacts/packages`.
+- Dependency advisory check: `dotnet list Models/PolyhydraGames.Core.Models.csproj package --include-transitive --vulnerable`.
+- Downstream validation: run the closest consumer test gate, starting with `core.nas` for media contracts: `dotnet test src/NasDb.Tests/NasDb.Tests.csproj --configuration Release` from `/mnt/data/lancer1977/code/core.nas`.
+- Release notes: add a compatibility note using `docs/release-notes/shared-contract-change-template.md` for any added, removed, renamed, or semantically changed public model member.
 
 ### Typical Usage
 ```csharp
@@ -166,3 +179,4 @@ Detailed documentation can be found in the following sections:
 - [Core Capabilities](./docs/features/core-capabilities.md)
 - [Media Models](./docs/features/media-models/README.md)
 - [Strongly Typed Identifiers](./docs/features/strongly-typed-identifiers/README.md)
+- [Shared Contract Release Gates](./docs/release-notes/shared-contract-change-template.md)
