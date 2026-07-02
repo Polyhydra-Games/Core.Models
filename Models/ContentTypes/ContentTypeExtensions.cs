@@ -9,7 +9,7 @@ public static class ContentTypeExtensions
     {
         var stringValueAttribute = contentType.GetType()
             .GetField(contentType.ToString())
-            .GetCustomAttributes(typeof(StringValueAttribute), false)
+            ?.GetCustomAttributes(typeof(StringValueAttribute), false)
             .FirstOrDefault() as StringValueAttribute;
 
         return stringValueAttribute?.Value ?? contentType.ToString();

@@ -38,7 +38,7 @@ public static class PortReplyExtensions
             throw;
         }
     }
-    public static PortReply ToPortReply(this string context, NameValueCollection headers = null)
+    public static PortReply ToPortReply(this string context, NameValueCollection? headers = null)
     {
         try
         {

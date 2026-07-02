@@ -8,7 +8,7 @@ namespace PolyhydraGames.Core.Models;
 public class SubjectObservable<T> : IObservable<T>
 {
     private readonly bool _checkEquality;
-    private T _value;
+    private T _value = default!;
 
     public T Value
     {

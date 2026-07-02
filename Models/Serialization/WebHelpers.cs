@@ -38,7 +38,7 @@ public static class WebHelpers
 
     }
 
-    public static async Task<T> GetItemAsync<T>(this HttpClient client, string url, Serialize encoding) where T : class
+    public static async Task<T?> GetItemAsync<T>(this HttpClient client, string url, Serialize encoding) where T : class
     {
         try
         {

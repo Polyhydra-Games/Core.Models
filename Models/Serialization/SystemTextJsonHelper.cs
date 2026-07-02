@@ -16,11 +16,11 @@ public class SystemTextJsonHelper : ISerializationProvider
 
     public T DeserializeObject<T>(string value, bool continueOnError = true)
     {
-        return JsonSerializer.Deserialize<T>(value, Options);
+        return JsonSerializer.Deserialize<T>(value, Options)!;
     }
 
     public object DeserializeObject(string value, Type type, bool continueOnError = true) =>
-        JsonSerializer.Deserialize(value, type, Options);
+        JsonSerializer.Deserialize(value, type, Options)!;
 
     public string SerializeObject(object value) => JsonSerializer.Serialize(value);
 }

@@ -9,7 +9,7 @@ namespace PolyhydraGames.Core.Models
 
         public void Save()
         {
-            Action invokeSave = this._invokeSave;
+            Action? invokeSave = this._invokeSave;
             if (invokeSave == null)
                 return;
             invokeSave();

@@ -6,20 +6,23 @@ namespace PolyhydraGames.Core.Models.Serialization;
 
 public static class XmlExtensions
 {
-    public static ISerializationProvider Provider { get; set; }
+    public static ISerializationProvider? Provider { get; set; }
 
     public static object FromXML(this string data, Type type, bool continueOnError = true)
     {
+        if (Provider == null)
+            throw new NullReferenceException("ISerialization provider was not set. Please initialize this before use");
+
         try
         {
             return string.IsNullOrEmpty(data)
-                ? Activator.CreateInstance(type)
+                ? Activator.CreateInstance(type)!
                 : Provider.DeserializeObject(data, type, continueOnError);
         }
         catch (Exception ex)
         {
             Debug.WriteLine(ex.Message);
-            return Activator.CreateInstance(type);
+            return Activator.CreateInstance(type)!;
         }
     }
 
@@ -27,7 +30,7 @@ public static class XmlExtensions
     {
         if (Provider == null)
             throw new NullReferenceException("ISerialization provider was not set. Please initialize this before use");
-        return string.IsNullOrEmpty(value) ? default : Provider.DeserializeObject<T>(value, continueOnError);
+        return string.IsNullOrEmpty(value) ? default! : Provider.DeserializeObject<T>(value, continueOnError);
     }
 
     public static string ToXML(this object value)

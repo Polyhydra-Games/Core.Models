@@ -9,21 +9,21 @@ public static class JsonHelper
 {
     public static ISerializationProvider Provider { get; } = new SystemTextJsonHelper();
 
-    public static object FromJson(this string data, Type type, bool continueOnError = true)
+    public static object FromJson(this string? data, Type type, bool continueOnError = true)
     {
         try
         {
             return string.IsNullOrEmpty(data)
-                ? Activator.CreateInstance(type)
+                ? Activator.CreateInstance(type)!
                 : Provider.DeserializeObject(data, type, continueOnError);
         }
         catch (Exception ex)
         {
             Debug.WriteLine(ex.Message);
-            return Activator.CreateInstance(type);
+            return Activator.CreateInstance(type)!;
         }
     }
-    public static T FromJson<T>(this string value, bool continueOnError = true)
+    public static T FromJson<T>(this string? value, bool continueOnError = true)
     {
         if (Provider == null) throw new NullReferenceException("ISerialization provider was not set. Please initialize this before use");
         if (string.IsNullOrEmpty(value))
