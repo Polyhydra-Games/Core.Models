@@ -28,6 +28,6 @@ tags: [feature, roadmap, media, Core.Models]
 ## Later
 
 - [ ] Add optional chapter/subtitle/stream-list models if real consumers need them.
-- [ ] Add compatibility tests for downstream JSON payloads.
+- [x] Add compatibility tests for downstream JSON payloads.
 - [ ] Document breaking-change rules for shared model evolution.
 - [ ] Add richer playlist transition/cue models only after a real downstream consumer needs them.

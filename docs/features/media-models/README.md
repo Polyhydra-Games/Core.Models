@@ -53,9 +53,9 @@ Downstream owners:
 
 - [x] `core.nas` owns filesystem scanning, NAS indexing, ffmpeg/ffprobe metadata extraction, persistence, and availability refresh.
 - [x] `SvengoolieDB` owns catalog-specific title, episode, image, and playback mapping.
-- [ ] `Media-Metadata` owns external provider metadata such as TVMaze, TMDb, OMDb, TheTVDB, and Watchmode.
+- [x] `Media-Metadata` owns external provider metadata such as TVMaze, TMDb, OMDb, TheTVDB, and Watchmode.
 - [x] `chop-it` owns concrete playback, clipping, playlist generation, and operator flow.
-- [ ] `core.ffmpeg` owns FFmpeg command construction, RTMP/HLS/file output, overlays, runtime text, ffprobe, and process lifecycle.
+- [x] `core.ffmpeg` owns FFmpeg command construction, RTMP/HLS/file output, overlays, runtime text, ffprobe, and process lifecycle.
 - [x] `app-busey-box` owns concrete RTMP/Twitch playout, now-playing state, and Docker/runtime broadcast control.
 
 ## Model Notes
@@ -86,7 +86,7 @@ Downstream owners:
 
 - [x] Add mapping extension methods in `core.nas`.
 - [x] Add mapping extension methods in `SvengoolieDB`.
-- [ ] Audit CDN file records for overlap with `MediaFileLocation`.
+- [x] Audit CDN file records for overlap with `MediaFileLocation`.
 - [x] Decide whether `MediaKind.Rom` should become `GameRom` before broad adoption. Keep `Rom` for compatibility.
 - [x] Add first playlist/playout contracts under `Core.Models.Media.Playlists`.
 - [x] Add downstream playlist mapping in `chop-it` before expanding fields.

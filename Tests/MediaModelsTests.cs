@@ -267,6 +267,105 @@ public class MediaModelsTests
     }
 
     [Test]
+    public void MediaPlaylist_DeserializesBuseyStyleManifestPayload()
+    {
+        const string json = """
+            {
+              "Version": 1,
+              "PlaylistId": "busey:show-01",
+              "Name": "show-01",
+              "OverlayPreset": "default",
+              "Playback": {
+                "Loop": true,
+                "Shuffle": false,
+                "StartIndex": 0
+              },
+              "Items": [
+                {
+                  "Title": "Intro",
+                  "RelativePath": "video/01-intro.mp4",
+                  "NowPlayingText": "Now Playing: Intro"
+                },
+                {
+                  "Title": "Episode",
+                  "RelativePath": "video/02-episode.mp4"
+                }
+              ]
+            }
+            """;
+
+        var playlist = JsonSerializer.Deserialize<MediaPlaylist>(json);
+        var validation = MediaPlaylistHelpers.Validate(playlist);
+
+        Assert.That(playlist, Is.Not.Null);
+        Assert.That(playlist!.PlaylistId, Is.EqualTo("busey:show-01"));
+        Assert.That(playlist.OverlayPreset, Is.EqualTo("default"));
+        Assert.That(playlist.Playback.Loop, Is.True);
+        Assert.That(playlist.Playback.StartIndex, Is.EqualTo(0));
+        Assert.That(playlist.Items, Has.Count.EqualTo(2));
+        Assert.That(playlist.Items[0].RelativePath, Is.EqualTo("video/01-intro.mp4"));
+        Assert.That(MediaPlaylistHelpers.GetNowPlayingText(playlist.Items[0]), Is.EqualTo("Now Playing: Intro"));
+        Assert.That(MediaPlaylistHelpers.GetNowPlayingText(playlist.Items[1]), Is.EqualTo("Episode"));
+        Assert.That(validation.IsValid, Is.True, string.Join("; ", validation.Errors));
+    }
+
+    [Test]
+    public void MediaPlaylist_DeserializesChopItSegmentPayload()
+    {
+        const string json = """
+            {
+              "Version": 1,
+              "PlaylistId": "chop-it:svengoolie",
+              "Name": "Svengoolie Segments",
+              "SourceCollectionName": "Svengoolie",
+              "Source": {
+                "Name": "Svengoolie",
+                "RootPath": "/mnt/syn2/video/TV Shows/Svengoolie",
+                "Recursive": true,
+                "FilePatterns": [ "*.mp4", "*.mkv" ]
+              },
+              "Playback": {
+                "Loop": true,
+                "RandomOrder": true,
+                "ClipLength": "00:00:30",
+                "CrossfadeDuration": "00:00:02"
+              },
+              "Items": [
+                {
+                  "PlaylistItemId": "clip-1",
+                  "Title": "The Killer Shrews",
+                  "SourceCollection": "Svengoolie",
+                  "StartOffset": "00:10:00",
+                  "Duration": "00:00:30",
+                  "Weight": 2,
+                  "Media": {
+                    "MediaFileId": "nas:123",
+                    "FileName": "Svengoolie - The Killer Shrews [S02E20].mp4",
+                    "Location": {
+                      "RelativePath": "TV Shows/Svengoolie/Svengoolie - The Killer Shrews [S02E20].mp4"
+                    }
+                  }
+                }
+              ]
+            }
+            """;
+
+        var playlist = JsonSerializer.Deserialize<MediaPlaylist>(json);
+        var playable = MediaPlaylistHelpers.GetPlayableItems(playlist!);
+
+        Assert.That(playlist, Is.Not.Null);
+        Assert.That(playlist!.SourceCollectionName, Is.EqualTo("Svengoolie"));
+        Assert.That(playlist.Source!.RootPath, Is.EqualTo("/mnt/syn2/video/TV Shows/Svengoolie"));
+        Assert.That(playlist.Source.FilePatterns, Is.EquivalentTo(new[] { "*.mp4", "*.mkv" }));
+        Assert.That(playlist.Playback.RandomOrder, Is.True);
+        Assert.That(playlist.Playback.ClipLength, Is.EqualTo(TimeSpan.FromSeconds(30)));
+        Assert.That(playlist.Items[0].StartOffset, Is.EqualTo(TimeSpan.FromMinutes(10)));
+        Assert.That(playlist.Items[0].Media!.MediaFileId, Is.EqualTo("nas:123"));
+        Assert.That(playable, Has.Count.EqualTo(1));
+        Assert.That(MediaPlaylistHelpers.Validate(playlist).IsValid, Is.True);
+    }
+
+    [Test]
     public void MediaAssetReference_SerializesAndDeserializesSharedShape()
     {
         var reference = new MediaAssetReference
