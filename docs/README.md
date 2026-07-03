@@ -4,6 +4,7 @@
 
 - [Core Models](core-models.md)
 - [Feature Index](features/README.md)
+- [Portable Media Contract Adoption](features/media-contract-adoption/README.md)
 
 ## Roadmap
 
