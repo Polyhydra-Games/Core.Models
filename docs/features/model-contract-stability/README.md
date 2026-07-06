@@ -3,7 +3,7 @@ title: Model Contract Stability
 status: active
 owner: @DreadBreadcrumb
 created: 2026-05-20
-updated: 2026-06-27
+updated: 2026-07-06
 tags: [feature, documentation, Core.Models, contracts]
 ---
 
@@ -75,6 +75,34 @@ When a change is not clearly patch-safe, treat it as minor until a consumer
 validation proves otherwise. When a change is not clearly minor-safe, open a
 consumer migration issue before merging it.
 
+## Breaking Change Rules
+
+A shared model change is breaking when an existing consumer must change source
+code, stored data, serialized JSON, generated clients, or release configuration
+to keep working.
+
+Treat these as breaking by default:
+
+- removing or renaming a public type, member, enum value, or helper
+- changing a member type or collection shape
+- making an optional member required
+- changing JSON property names, defaults, enum values, or converter behavior
+- moving a contract to a new namespace or package
+- changing helper behavior in a way that alters existing serialized output
+
+Breaking changes require a coordinated release plan before merge:
+
+- a release note using the shared-contract change template
+- an explicit versioning decision
+- validation against every known consumer touched by the contract family
+- one migration issue per affected consumer repo when consumer code or data must
+  change
+
+Consumer migration issues should be opened before merging whenever the shared
+change is not additive, when a consumer package reference must be bumped in the
+same rollout, or when a consumer needs data migration, fixture updates, or API
+contract changes to adopt the new shape.
+
 ## Required Validation
 
 All shared model changes need:
@@ -98,3 +126,5 @@ dotnet test src/NasDb.Tests/NasDb.Tests.csproj --configuration Release
   relationship, and queue/request contracts?
 - [ ] Should any consumer-specific migration examples be promoted into
   reusable release note examples?
+
+Tracking issue: https://github.com/lancer1977/Core.Models/issues/17.
