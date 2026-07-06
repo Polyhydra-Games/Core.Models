@@ -26,10 +26,40 @@ namespace PolyhydraGames.Core.Models.Analytics
         /// </summary>
         /// <param name="action">Action.</param>
         public void RunAction(Action<IAnalytics> action){
-            Task.Run (() => {
-                foreach (var item in Services)
-                    action (item);
-            });
+            foreach (var item in Services)
+                action (item);
+        }
+
+        public bool TryRunAction(Action<IAnalytics> action)
+        {
+            try
+            {
+                RunAction(action);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task RunActionAsync(Func<IAnalytics, Task> action)
+        {
+            foreach (var item in Services)
+                await action(item).ConfigureAwait(false);
+        }
+
+        public async Task<bool> TryRunActionAsync(Func<IAnalytics, Task> action)
+        {
+            try
+            {
+                await RunActionAsync(action).ConfigureAwait(false);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
     }

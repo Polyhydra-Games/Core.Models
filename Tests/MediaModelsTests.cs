@@ -433,6 +433,242 @@ public class MediaModelsTests
     }
 
     [Test]
+    public void MediaItemReference_DefaultsToSparsePortableReference()
+    {
+        var reference = new MediaItemReference();
+
+        Assert.That(reference.ReferenceId, Is.Null);
+        Assert.That(reference.StorageId, Is.Null);
+        Assert.That(reference.ContentHash, Is.Null);
+        Assert.That(reference.CdnId, Is.Null);
+        Assert.That(reference.CdnUrl, Is.Null);
+        Assert.That(reference.Kind, Is.EqualTo(MediaKind.Unknown));
+        Assert.That(reference.DisplayTitle, Is.Null);
+        Assert.That(reference.DisplaySubtitle, Is.Null);
+        Assert.That(reference.Providers, Is.Empty);
+        Assert.That(reference.Assets, Is.Empty);
+        Assert.That(reference.Metadata, Is.Empty);
+    }
+
+    [Test]
+    public void MediaItemReference_SerializesAndDeserializesLayeredSharedShape()
+    {
+        var reference = new MediaItemReference
+        {
+            ReferenceId = "tracker:playlist:item:001",
+            StorageId = "core.nas:media:tracker:modarchive:0001",
+            ContentHash = "sha256:4d9676bce22c8e6f89edc1c491d58f8b5a3a2f4f85f4d7f447553f9f4d6f3a11",
+            CdnId = "cdn:tracker-modules/modarchive/0001.mod",
+            CdnUrl = "https://cdn.example.test/tracker-modules/modarchive/0001.mod",
+            Kind = MediaKind.Audio,
+            DisplayTitle = "Crystal Hammer",
+            DisplaySubtitle = "tracker module - MOD",
+            Providers =
+            [
+                new MediaProviderReference
+                {
+                    ProviderKey = "modarchive",
+                    ExternalId = "0001",
+                    DisplayName = "The Mod Archive",
+                    Url = "https://modarchive.org/index.php?request=view_by_moduleid&query=0001",
+                    Metadata = new Dictionary<string, string>
+                    {
+                        ["confidence"] = "authoritative",
+                        ["format"] = "mod"
+                    }
+                },
+                new MediaProviderReference
+                {
+                    ProviderKey = "spotify",
+                    ExternalId = "artist:example",
+                    DisplayName = "Example Artist"
+                }
+            ],
+            Assets =
+            [
+                new MediaAssetReference
+                {
+                    AssetId = "cdn:tracker-module:0001",
+                    Title = "Crystal Hammer module",
+                    Kind = MediaAssetReferenceKind.CdnAsset,
+                    Role = "playback-source",
+                    Url = "https://cdn.example.test/tracker-modules/modarchive/0001.mod",
+                    SourceName = "Api.CDN",
+                    Metadata = new Dictionary<string, string>
+                    {
+                        ["storageId"] = "core.nas:media:tracker:modarchive:0001"
+                    }
+                },
+                new MediaAssetReference
+                {
+                    AssetId = "artwork:tracker:0001",
+                    Title = "Generated tracker artwork",
+                    Kind = MediaAssetReferenceKind.ProviderImage,
+                    Role = "poster",
+                    Url = "https://cdn.example.test/tracker-artwork/0001.png"
+                }
+            ],
+            Metadata = new Dictionary<string, string>
+            {
+                ["pilot"] = "tracker-music",
+                ["sourceRepo"] = "core.tracker-audio"
+            }
+        };
+
+        var json = JsonSerializer.Serialize(reference);
+        var roundTrip = JsonSerializer.Deserialize<MediaItemReference>(json);
+
+        Assert.That(roundTrip, Is.Not.Null);
+        Assert.That(roundTrip!.ReferenceId, Is.EqualTo("tracker:playlist:item:001"));
+        Assert.That(roundTrip.StorageId, Is.EqualTo("core.nas:media:tracker:modarchive:0001"));
+        Assert.That(roundTrip.ContentHash, Does.StartWith("sha256:"));
+        Assert.That(roundTrip.CdnId, Is.EqualTo("cdn:tracker-modules/modarchive/0001.mod"));
+        Assert.That(roundTrip.CdnUrl, Is.EqualTo("https://cdn.example.test/tracker-modules/modarchive/0001.mod"));
+        Assert.That(roundTrip.Kind, Is.EqualTo(MediaKind.Audio));
+        Assert.That(roundTrip.DisplayTitle, Is.EqualTo("Crystal Hammer"));
+        Assert.That(roundTrip.DisplaySubtitle, Is.EqualTo("tracker module - MOD"));
+        Assert.That(roundTrip.Providers, Has.Count.EqualTo(2));
+        Assert.That(roundTrip.Providers[0].ProviderKey, Is.EqualTo("modarchive"));
+        Assert.That(roundTrip.Providers[0].Metadata["format"], Is.EqualTo("mod"));
+        Assert.That(roundTrip.Providers[1].ExternalId, Is.EqualTo("artist:example"));
+        Assert.That(roundTrip.Assets, Has.Count.EqualTo(2));
+        Assert.That(roundTrip.Assets[0].Kind, Is.EqualTo(MediaAssetReferenceKind.CdnAsset));
+        Assert.That(roundTrip.Assets[0].Metadata["storageId"], Is.EqualTo("core.nas:media:tracker:modarchive:0001"));
+        Assert.That(roundTrip.Assets[1].Role, Is.EqualTo("poster"));
+        Assert.That(roundTrip.Metadata["pilot"], Is.EqualTo("tracker-music"));
+        Assert.That(roundTrip.Metadata["sourceRepo"], Is.EqualTo("core.tracker-audio"));
+    }
+
+    [Test]
+    public void MediaItemReference_AllowsEachOwningSystemToContributeOnlyItsLayer()
+    {
+        var nasOnly = new MediaItemReference
+        {
+            StorageId = "core.nas:media:svengoolie:the-blob",
+            ContentHash = "sha256:abc123",
+            Kind = MediaKind.Video,
+            DisplayTitle = "The Blob (1958).mkv"
+        };
+
+        var metadataOnly = nasOnly with
+        {
+            DisplayTitle = "The Blob",
+            Providers =
+            [
+                new MediaProviderReference
+                {
+                    ProviderKey = "tmdb",
+                    ExternalId = "10843",
+                    DisplayName = "The Blob"
+                }
+            ]
+        };
+
+        var cdnLayer = metadataOnly with
+        {
+            CdnId = "cdn:svengoolie/the-blob",
+            CdnUrl = "https://cdn.example.test/svengoolie/the-blob.mkv",
+            Assets =
+            [
+                new MediaAssetReference
+                {
+                    AssetId = "cdn:svengoolie/the-blob",
+                    Kind = MediaAssetReferenceKind.CdnAsset,
+                    Role = "public-video",
+                    Url = "https://cdn.example.test/svengoolie/the-blob.mkv"
+                }
+            ]
+        };
+
+        Assert.That(nasOnly.StorageId, Is.EqualTo("core.nas:media:svengoolie:the-blob"));
+        Assert.That(nasOnly.Providers, Is.Empty);
+        Assert.That(nasOnly.CdnUrl, Is.Null);
+        Assert.That(metadataOnly.StorageId, Is.EqualTo(nasOnly.StorageId));
+        Assert.That(metadataOnly.Providers.Single().ProviderKey, Is.EqualTo("tmdb"));
+        Assert.That(metadataOnly.CdnUrl, Is.Null);
+        Assert.That(cdnLayer.StorageId, Is.EqualTo(nasOnly.StorageId));
+        Assert.That(cdnLayer.Providers.Single().ExternalId, Is.EqualTo("10843"));
+        Assert.That(cdnLayer.CdnUrl, Is.EqualTo("https://cdn.example.test/svengoolie/the-blob.mkv"));
+        Assert.That(cdnLayer.Assets.Single().Role, Is.EqualTo("public-video"));
+    }
+
+    [Test]
+    public void MediaItemReference_DoesNotRequireLocalPathsOrProductState()
+    {
+        var reference = new MediaItemReference
+        {
+            StorageId = "core.nas:media:music:0001",
+            ContentHash = "sha256:def456",
+            CdnUrl = "https://cdn.example.test/music/0001.flac",
+            Kind = MediaKind.Audio,
+            DisplayTitle = "Example Track",
+            Providers =
+            [
+                new MediaProviderReference
+                {
+                    ProviderKey = "spotify",
+                    ExternalId = "track:0001"
+                }
+            ]
+        };
+
+        var json = JsonSerializer.Serialize(reference);
+
+        Assert.That(json, Does.Not.Contain("FullPath"));
+        Assert.That(json, Does.Not.Contain("RelativePath"));
+        Assert.That(json, Does.Not.Contain("Queue"));
+        Assert.That(json, Does.Not.Contain("Session"));
+        Assert.That(json, Does.Not.Contain("Schedule"));
+        Assert.That(json, Does.Not.Contain("/mnt/"));
+    }
+
+    [Test]
+    public void MediaItemReference_DeserializesDocumentedContractShape()
+    {
+        const string json = """
+            {
+              "StorageId": "core.nas:media:tracker:0001",
+              "ContentHash": "sha256:789",
+              "CdnUrl": "https://cdn.example.test/tracker/0001.mod",
+              "Kind": 2,
+              "DisplayTitle": "Tracker Demo",
+              "DisplaySubtitle": "MOD",
+              "Providers": [
+                {
+                  "ProviderKey": "modarchive",
+                  "ExternalId": "0001",
+                  "DisplayName": "The Mod Archive"
+                }
+              ],
+              "Assets": [
+                {
+                  "AssetId": "cdn:tracker:0001",
+                  "Kind": 2,
+                  "Role": "playback-source",
+                  "Url": "https://cdn.example.test/tracker/0001.mod"
+                }
+              ],
+              "Metadata": {
+                "pilot": "tracker-music"
+              }
+            }
+            """;
+
+        var reference = JsonSerializer.Deserialize<MediaItemReference>(json);
+
+        Assert.That(reference, Is.Not.Null);
+        Assert.That(reference!.StorageId, Is.EqualTo("core.nas:media:tracker:0001"));
+        Assert.That(reference.ContentHash, Is.EqualTo("sha256:789"));
+        Assert.That(reference.CdnUrl, Is.EqualTo("https://cdn.example.test/tracker/0001.mod"));
+        Assert.That(reference.Kind, Is.EqualTo(MediaKind.Audio));
+        Assert.That(reference.DisplayTitle, Is.EqualTo("Tracker Demo"));
+        Assert.That(reference.DisplaySubtitle, Is.EqualTo("MOD"));
+        Assert.That(reference.Providers.Single().ProviderKey, Is.EqualTo("modarchive"));
+        Assert.That(reference.Assets.Single().AssetId, Is.EqualTo("cdn:tracker:0001"));
+        Assert.That(reference.Metadata["pilot"], Is.EqualTo("tracker-music"));
+    }
+
+    [Test]
     public void MediaRelationship_SerializesAndDeserializesSharedShape()
     {
         var relationships = new[]

@@ -23,4 +23,16 @@ public class SystemTextJsonHelper : ISerializationProvider
         JsonSerializer.Deserialize(value, type, Options)!;
 
     public string SerializeObject(object value) => JsonSerializer.Serialize(value);
+
+    public (bool Success, string? Value) TrySerializeObject(object value)
+    {
+        try
+        {
+            return (true, SerializeObject(value));
+        }
+        catch
+        {
+            return (false, null);
+        }
+    }
 }
