@@ -23,3 +23,7 @@ Changes to public contracts and JSON serialization are consumer-facing. Preserve
 ## Pull requests
 
 Describe the consumer impact, validation performed, and any compatibility implications. The CI workflow builds, tests, and creates local package artifacts only; it does not publish packages.
+
+## Releases
+
+See [the maintainer release procedure](docs/releasing.md). Publishing is deliberately restricted to a reviewed `main` workflow dispatch and the protected `nuget-release` environment.
