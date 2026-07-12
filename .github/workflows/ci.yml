@@ -12,7 +12,7 @@ jobs:
   build-test-pack:
     # The runner account cannot write the system SDK directory; keep CI SDKs isolated per run.
     env:
-      DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
+      DOTNET_INSTALL_DIR: /home/lancer1977/actions-runner/core-models/_work/_tool/dotnet
     # This public repository runs unreviewed pull-request code nowhere on the self-hosted runner.
     # Validation executes only for trusted main-branch pushes or a maintainer-triggered dispatch.
     runs-on: [self-hosted, Linux, X64, core-models-validation]
