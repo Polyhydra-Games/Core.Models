@@ -1,0 +1,200 @@
+name: Release NuGet package
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Validate and upload release artifacts without publishing, tagging, or creating a GitHub release.
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-models-nuget-release
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    # Public pull-request code never executes on this self-hosted runner.
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, Linux, X64, core-models-validation]
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    env:
+      DOTNET_INSTALL_DIR: /home/lancer1977/actions-runner/core-models/_work/_tool/dotnet
+      NUGET_PACKAGES: /home/lancer1977/actions-runner/core-models/_work/_tool/nuget-packages
+      PACKAGE_ID: PolyhydraGames.Core.Models
+    steps:
+      - name: Check out trusted main without persisted credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          global-json-file: global.json
+
+      - name: Read and validate package version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(dotnet msbuild Models/PolyhydraGames.Core.Models.csproj -nologo -getProperty:Version | tail -n 1 | tr -d '\r')
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Project Version must be a NuGet-compatible SemVer value."
+            exit 1
+          fi
+          tag="v$version"
+          if git ls-remote --exit-code --tags https://github.com/${GITHUB_REPOSITORY}.git "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "::error::Tag $tag already exists."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Reject an existing NuGet version
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_id_lower=$(printf '%s' "$PACKAGE_ID" | tr '[:upper:]' '[:lower:]')
+          url="https://api.nuget.org/v3-flatcontainer/${package_id_lower}/${{ steps.version.outputs.version }}/${package_id_lower}.${{ steps.version.outputs.version }}.nupkg"
+          status=$(curl --connect-timeout 10 --max-time 30 --silent --show-error --output /dev/null --write-out '%{http_code}' "$url")
+          case "$status" in
+            404) ;;
+            200) echo "::error::${PACKAGE_ID} ${{ steps.version.outputs.version }} already exists on nuget.org."; exit 1 ;;
+            *) echo "::error::Could not verify nuget.org version availability (HTTP $status)."; exit 1 ;;
+          esac
+
+      - name: Restore
+        run: dotnet restore PolyhydraGames.Core.Models.sln --nologo
+
+      - name: Build
+        run: dotnet build PolyhydraGames.Core.Models.sln --configuration Release --no-restore --nologo
+
+      - name: Test
+        run: dotnet test PolyhydraGames.Core.Models.sln --configuration Release --no-build --nologo
+
+      - name: Pack
+        run: dotnet pack Models/PolyhydraGames.Core.Models.csproj --configuration Release --no-build --nologo --output artifacts/packages
+
+      - name: Enforce package payload allowlists
+        shell: bash
+        run: |
+          set -euo pipefail
+          nupkg="artifacts/packages/${PACKAGE_ID}.${{ steps.version.outputs.version }}.nupkg"
+          snupkg="artifacts/packages/${PACKAGE_ID}.${{ steps.version.outputs.version }}.snupkg"
+          test -f "$nupkg"
+          test -f "$snupkg"
+
+          check_archive() {
+            local archive="$1"
+            local symbols="$2"
+            local entry
+            while IFS= read -r entry; do
+              case "$entry" in
+                _rels/.rels|[Content_Types].xml|"${PACKAGE_ID}.nuspec"|package/services/metadata/core-properties/*.psmdcp) ;;
+                lib/net8.0/PolyhydraGames.Core.Models.dll|lib/net9.0/PolyhydraGames.Core.Models.dll) test "$symbols" = false ;;
+                lib/net8.0/PolyhydraGames.Core.Models.xml|lib/net9.0/PolyhydraGames.Core.Models.xml) test "$symbols" = false ;;
+                README.md|LICENSE) test "$symbols" = false ;;
+                lib/net8.0/PolyhydraGames.Core.Models.pdb|lib/net9.0/PolyhydraGames.Core.Models.pdb) test "$symbols" = true ;;
+                *) echo "::error::Unexpected package entry: $entry"; exit 1 ;;
+              esac
+            done < <(unzip -Z1 "$archive")
+          }
+
+          check_archive "$nupkg" false
+          check_archive "$snupkg" true
+
+          mapfile -t publishable_packages < <(find artifacts/packages -maxdepth 1 -type f \( -name '*.nupkg' -o -name '*.snupkg' \) -printf '%f\n' | sort)
+          expected_nupkg="${PACKAGE_ID}.${{ steps.version.outputs.version }}.nupkg"
+          expected_snupkg="${PACKAGE_ID}.${{ steps.version.outputs.version }}.snupkg"
+          if [[ "${#publishable_packages[@]}" -ne 2 || "${publishable_packages[0]}" != "$expected_nupkg" || "${publishable_packages[1]}" != "$expected_snupkg" ]]; then
+            printf '::error::Unexpected publishable package set: %s\n' "${publishable_packages[*]:-<empty>}"
+            exit 1
+          fi
+
+      - name: Upload validated release artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: core-models-${{ steps.version.outputs.version }}
+          path: |
+            artifacts/packages/${{ env.PACKAGE_ID }}.${{ steps.version.outputs.version }}.nupkg
+            artifacts/packages/${{ env.PACKAGE_ID }}.${{ steps.version.outputs.version }}.snupkg
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: validate
+    if: inputs.dry_run == false
+    permissions:
+      contents: write
+    environment: nuget-release
+    runs-on: [self-hosted, Linux, X64, core-models-validation]
+    env:
+      PACKAGE_ID: PolyhydraGames.Core.Models
+    steps:
+      - name: Check out trusted main for tag creation
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Download approved release artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: core-models-${{ needs.validate.outputs.version }}
+          path: artifacts/packages
+
+      - name: Publish package and symbols to nuget.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${NUGET_API_KEY:-}" ]]; then
+            echo "::error::The protected nuget-release environment must provide NUGET_API_KEY."
+            exit 1
+          fi
+          dotnet nuget push "artifacts/packages/${PACKAGE_ID}.${{ needs.validate.outputs.version }}.nupkg" \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key "$NUGET_API_KEY" \
+            --timeout 120
+          dotnet nuget push "artifacts/packages/${PACKAGE_ID}.${{ needs.validate.outputs.version }}.snupkg" \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key "$NUGET_API_KEY" \
+            --timeout 120
+
+      - name: Verify NuGet publication before tagging
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_id_lower=$(printf '%s' "$PACKAGE_ID" | tr '[:upper:]' '[:lower:]')
+          url="https://api.nuget.org/v3-flatcontainer/${package_id_lower}/${{ needs.validate.outputs.version }}/${package_id_lower}.${{ needs.validate.outputs.version }}.nupkg"
+          for attempt in {1..12}; do
+            status=$(curl --connect-timeout 10 --max-time 30 --silent --show-error --output /dev/null --write-out '%{http_code}' "$url")
+            if [[ "$status" = 200 ]]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::nuget.org did not expose the exact published package version within the verification window."
+          exit 1
+
+      - name: Create immutable source tag and GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git tag --annotate "${{ needs.validate.outputs.tag }}" --message "${PACKAGE_ID} ${{ needs.validate.outputs.version }}"
+          git push origin "${{ needs.validate.outputs.tag }}"
+          gh release create "${{ needs.validate.outputs.tag }}" \
+            "artifacts/packages/${PACKAGE_ID}.${{ needs.validate.outputs.version }}.nupkg" \
+            "artifacts/packages/${PACKAGE_ID}.${{ needs.validate.outputs.version }}.snupkg" \
+            --title "${PACKAGE_ID} ${{ needs.validate.outputs.version }}" \
+            --generate-notes

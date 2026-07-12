@@ -2,6 +2,9 @@
 
 All notable changes to this project are documented here.
 
-## Unreleased
+## 2.0.0
 
-- Initial public-source candidate containing the curated library implementation, tests, public documentation, and non-publishing CI.
+- First clean-root public release under the MIT-0 license.
+- Curated portable contracts, identifiers, media models, serialization helpers, and tests.
+- Removed private product-specific streaming contracts and internal operational material from the public source distribution.
+- Added a protected, maintainer-triggered NuGet release process.
