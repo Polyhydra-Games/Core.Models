@@ -98,7 +98,7 @@ jobs:
             local entry
             while IFS= read -r entry; do
               case "$entry" in
-                _rels/.rels|[Content_Types].xml|"${PACKAGE_ID}.nuspec"|package/services/metadata/core-properties/*.psmdcp) ;;
+                _rels/.rels|"[Content_Types].xml"|"${PACKAGE_ID}.nuspec"|package/services/metadata/core-properties/*.psmdcp) ;;
                 lib/net8.0/PolyhydraGames.Core.Models.dll|lib/net9.0/PolyhydraGames.Core.Models.dll) test "$symbols" = false ;;
                 lib/net8.0/PolyhydraGames.Core.Models.xml|lib/net9.0/PolyhydraGames.Core.Models.xml) test "$symbols" = false ;;
                 README.md|LICENSE) test "$symbols" = false ;;
