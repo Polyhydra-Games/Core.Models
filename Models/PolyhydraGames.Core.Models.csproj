@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <PackageId>PolyhydraGames.Core.Models</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Polyhydra Games</Authors>
+    <Company>Polyhydra Games</Company>
+    <Product>PolyhydraGames Core Models</Product>
+    <Description>Reusable .NET contracts, strongly typed identifiers, media models, serialization helpers, and reactive utilities.</Description>
+    <PackageTags>models;contracts;dto;identifiers;media;serialization</PackageTags>
+    <PackageProjectUrl>https://github.com/Polyhydra-Games/Core.Models</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Polyhydra-Games/Core.Models.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryBranch>main</RepositoryBranch>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageLicenseExpression>MIT-0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.300" PrivateAssets="All" />
+    <PackageReference Include="PolyhydraGames.Core.Interfaces" Version="2.0.0.46" />
+    <PackageReference Include="PolyhydraGames.Extensions" Version="2.1.1.78" />
+    <PackageReference Include="System.Reactive" Version="6.1.0" />
+  </ItemGroup>
+</Project>

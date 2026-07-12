@@ -1,0 +1,21 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+artifacts/
+*.nupkg
+*.snupkg
+
+# IDE and user state
+.vs/
+*.user
+*.rsuser
+*.suo
+*.userprefs
+*.sln.docstates
+*.DotSettings.user
+
+# Test output
+[Tt]est[Rr]esult*/
+TestResult.xml
+coverage*.xml
+coverage*.json
