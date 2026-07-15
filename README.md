@@ -130,7 +130,7 @@ The package is published publicly on nuget.org. New `main` builds publish `1.0.2
 - .NET 10.0 SDK or later for the current test project
 - .NET 8.0 and .NET 9.0 targeting packs for the library targets
 - The following NuGet packages are automatically resolved:
-  - `PolyhydraGames.Core.Interfaces` (v2.0.0.45)
+  - `PolyhydraGames.Core.Interfaces` (v2.0.0.47)
   - `PolyhydraGames.Extensions` (v2.1.1.78)
   - `System.Reactive` (v6.1.0)
 
