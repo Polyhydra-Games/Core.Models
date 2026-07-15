@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 		<PackageId>PolyhydraGames.Core.Models</PackageId>
-		<VersionPrefix>1.0.2</VersionPrefix>
+		<VersionPrefix>2.0.0</VersionPrefix>
 		<Authors>Chris Richmond</Authors>
 		<Company>PolyhydraGames</Company>
 		<Product>PolyhydraGames Core Models</Product>
@@ -26,7 +26,7 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="PolyhydraGames.Core.Interfaces" Version="2.0.0.46" />
+		<PackageReference Include="PolyhydraGames.Core.Interfaces" Version="2.0.0.47" />
 		<PackageReference Include="PolyhydraGames.Extensions" Version="2.1.1.78" />
 		<PackageReference Include="System.Reactive" Version="6.1.0" />
 	</ItemGroup>

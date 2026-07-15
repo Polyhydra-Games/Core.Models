@@ -11,25 +11,27 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 env:
-  PACKAGE_VERSION: 1.0.2.${{ github.run_number }}
-  NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-
+  PACKAGE_VERSION: 2.0.0.${{ github.run_number }}
 jobs:
-  publish:
-    name: Test, pack, and publish
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  build:
+    name: Test and pack
+    if: >-
+      github.event_name != 'pull_request' ||
+      (github.actor == github.repository_owner &&
+       github.event.pull_request.user.login == github.repository_owner &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: [self-hosted, Linux, X64, core-models-ci]
 
     steps:
       - name: Checkout Core.Models
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
         with:
           dotnet-version: |
             8.0.x
@@ -45,22 +47,58 @@ jobs:
       - name: Pack
         run: dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release -p:PackageVersion=${{ env.PACKAGE_VERSION }} --output artifacts/packages
 
-      - name: Publish to GitHub Packages
-        if: github.event_name != 'pull_request'
+  publish:
+    name: Publish verified package
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: [self-hosted, Linux, X64, core-models-ci]
+    environment: nuget
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Core.Models
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Restore, test, and pack release commit
         run: |
+          dotnet restore Tests/PolyhydraGames.Core.Models.Test.csproj
+          dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release
+          dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release -p:PackageVersion=${{ env.PACKAGE_VERSION }} --output artifacts/packages
+
+      - name: Publish to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          test -n "$GITHUB_TOKEN"
           for package in artifacts/packages/*.nupkg; do
-            dotnet nuget push "$package" --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate
+            dotnet nuget push "$package" --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key "$GITHUB_TOKEN" --skip-duplicate
           done
 
-      - name: Require NuGet publish secret on main
-        if: github.event_name != 'pull_request' && env.NUGET_API_KEY == ''
+      - name: Publish to packages.polyhydragames.com
+        env:
+          BAGET_API_KEY: ${{ secrets.BAGET_API_KEY }}
         run: |
-          echo "::error::NUGET_API_KEY is not configured, so the package cannot be published to nuget.org from this workflow."
-          exit 1
+          test -n "$BAGET_API_KEY"
+          for package in artifacts/packages/*.nupkg; do
+            dotnet nuget push "$package" --source "https://packages.polyhydragames.com/api/v2/package" --api-key "$BAGET_API_KEY" --skip-duplicate
+          done
 
       - name: Publish to nuget.org
-        if: github.event_name != 'pull_request' && env.NUGET_API_KEY != ''
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
+          test -n "$NUGET_API_KEY"
           for package in artifacts/packages/*.nupkg; do
             dotnet nuget push "$package" --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY" --skip-duplicate
           done

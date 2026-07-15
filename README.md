@@ -117,10 +117,10 @@ var obj = json.FromJson<MyType>();
 
 ### Install via NuGet
 ```xml
-<PackageReference Include="PolyhydraGames.Core.Models" Version="1.0.2.10" />
+<PackageReference Include="PolyhydraGames.Core.Models" Version="2.0.0.*" />
 ```
 
-The package is published publicly on nuget.org. New `main` builds publish `1.0.2.<run_number>` when the repository has a valid `NUGET_API_KEY` secret.
+The package is published publicly on nuget.org and packages.polyhydragames.com. New `main` builds publish `2.0.0.<run_number>` after the release environment gates pass.
 
 ### Target Frameworks
 - **Main package:** `net8.0` and `net9.0` (multi-target)
@@ -130,7 +130,7 @@ The package is published publicly on nuget.org. New `main` builds publish `1.0.2
 - .NET 10.0 SDK or later for the current test project
 - .NET 8.0 and .NET 9.0 targeting packs for the library targets
 - The following NuGet packages are automatically resolved:
-  - `PolyhydraGames.Core.Interfaces` (v2.0.0.45)
+  - `PolyhydraGames.Core.Interfaces` (v2.0.0.47)
   - `PolyhydraGames.Extensions` (v2.1.1.78)
   - `System.Reactive` (v6.1.0)
 
