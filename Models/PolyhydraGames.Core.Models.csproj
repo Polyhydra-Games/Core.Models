@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 		<PackageId>PolyhydraGames.Core.Models</PackageId>
-		<VersionPrefix>1.0.2</VersionPrefix>
+		<VersionPrefix>2.0.0</VersionPrefix>
 		<Authors>Chris Richmond</Authors>
 		<Company>PolyhydraGames</Company>
 		<Product>PolyhydraGames Core Models</Product>

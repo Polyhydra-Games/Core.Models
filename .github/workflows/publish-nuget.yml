@@ -13,11 +13,15 @@ permissions:
   contents: read
 
 env:
-  PACKAGE_VERSION: 1.0.2.${{ github.run_number }}
+  PACKAGE_VERSION: 2.0.0.${{ github.run_number }}
 jobs:
   build:
     name: Test and pack
-    if: github.event_name != 'pull_request' || (github.actor == github.repository_owner && github.event.pull_request.head.repo.full_name == github.repository)
+    if: >-
+      github.event_name != 'pull_request' ||
+      (github.actor == github.repository_owner &&
+       github.event.pull_request.user.login == github.repository_owner &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: [self-hosted, Linux, X64, core-models-ci]
 
     steps:
