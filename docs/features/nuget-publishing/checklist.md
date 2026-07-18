@@ -34,7 +34,7 @@ Canonical doc: [README](./README.md). This checklist mirrors the canonical famil
 
 - [x] Confirm GitHub Actions restore, test, and pack succeed.
 - [x] Confirm publish currently fails because `NUGET_API_KEY` is not set.
-- [x] Add `NUGET_API_KEY` to GitHub repository secrets.
+- [x] Add `NUGET_API_KEY` to the protected `nuget-release` GitHub environment.
 - [x] Push to `main`.
 - [x] Confirm GitHub Actions publish step receives `Created` from nuget.org.
 - [x] Confirm the package appears in the nuget.org public flat-container index.

@@ -52,7 +52,7 @@ jobs:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: [self-hosted, Linux, X64, core-models-ci]
-    environment: nuget
+    environment: nuget-release
     permissions:
       contents: read
       packages: write

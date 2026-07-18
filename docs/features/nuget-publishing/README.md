@@ -35,13 +35,13 @@ The package is already public on nuget.org. The repository now owns repeatable p
 
 ## Required GitHub Secret
 
-- [x] `NUGET_API_KEY` must exist in the `lancer1977/Core.Models` repository secrets.
+- [x] `NUGET_API_KEY` must exist in the protected `nuget-release` GitHub environment for `lancer1977/Core.Models`.
 
 The workflow has been verified through restore, test, and pack. If the secret is missing on a non-PR run, the publish job now fails fast instead of silently skipping nuget.org.
 
 ## Latest Publish
 
-- [x] `NUGET_API_KEY` is configured in GitHub repository secrets.
+- [x] `NUGET_API_KEY` is configured in the protected `nuget-release` GitHub environment.
 - [x] Workflow dispatch published `PolyhydraGames.Core.Models` version `1.0.2.10`.
 - [x] GitHub Actions log showed nuget.org returned `Created` and `Your package was pushed`.
 - [x] NuGet flat-container index shows `1.0.2.10`; it also shows earlier `1.0.2.6`, `1.0.2.7`, and `1.0.2.8` packages.
