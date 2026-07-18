@@ -85,13 +85,13 @@ jobs:
             dotnet nuget push "$package" --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key "$GITHUB_TOKEN" --skip-duplicate
           done
 
-      - name: Publish to packages.polyhydragames.com
+      - name: Publish to nuget.polyhydragames.com
         env:
           BAGET_API_KEY: ${{ secrets.BAGET_API_KEY }}
         run: |
           test -n "$BAGET_API_KEY"
           for package in artifacts/packages/*.nupkg; do
-            dotnet nuget push "$package" --source "https://packages.polyhydragames.com/api/v2/package" --api-key "$BAGET_API_KEY" --skip-duplicate
+            dotnet nuget push "$package" --source "https://nuget.polyhydragames.com/v3/index.json" --api-key "$BAGET_API_KEY" --skip-duplicate
           done
 
       - name: Publish to nuget.org
