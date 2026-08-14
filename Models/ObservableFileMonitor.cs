@@ -7,13 +7,16 @@ using PolyhydraGames.Core.Interfaces;
 
 namespace PolyhydraGames.Core.Models;
 
-public class ObservableFileMonitor : IObservableFileMonitor
+public class ObservableFileMonitor : IObservableFileMonitor, IDisposable
 {
     public Subject<string> FileSubject { get; } = new Subject<string>();
     public IObservable<string> Observable { get; }
 
     // Specify the file to monitor
     private readonly string _folder;
+    private readonly object _watcherGate = new();
+    private FileSystemWatcher? _watcher;
+    private bool _disposed;
     public readonly string FilePath;
     public ObservableFileMonitor(string folder, string file)
     {
@@ -24,30 +27,62 @@ public class ObservableFileMonitor : IObservableFileMonitor
 
     public void Initialize()
     {
-        // Create a new FileSystemWatcher
-        var watcher = new FileSystemWatcher()
+        lock (_watcherGate)
         {
-            Path = _folder,
+            ObjectDisposedException.ThrowIf(_disposed, this);
 
-            // Set the filter to the file name
-            Filter = Path.GetFileName(FilePath),
+            if (_watcher is not null)
+                return;
 
-            // Enable the FileSystemWatcher
-            EnableRaisingEvents = true
-        };
+            _watcher = new FileSystemWatcher()
+            {
+                Path = _folder,
 
-        // Set the path to the directory containing the file
+                // Set the filter to the file name
+                Filter = Path.GetFileName(FilePath)
+            };
 
-        // Subscribe to the Changed event
-        watcher.Changed += (o, x) =>
-        {
-            var file = x.FullPath;
-            FileSubject.OnNext(file);
-            // Handle the file change event
-            Debug.WriteLine($"File changed: {x.FullPath}");
-        };
-
+            // Subscribe before enabling notifications so no change is missed.
+            _watcher.Changed += OnFileChanged;
+            _watcher.EnableRaisingEvents = true;
+        }
 
         Debug.WriteLine($"Monitoring changes to {FilePath}. Press Enter to exit.");
+    }
+
+    public void Dispose()
+    {
+        FileSystemWatcher? watcher;
+
+        lock (_watcherGate)
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            watcher = _watcher;
+            _watcher = null;
+        }
+
+        if (watcher is not null)
+        {
+            watcher.Changed -= OnFileChanged;
+            watcher.Dispose();
+        }
+
+        FileSubject.OnCompleted();
+        FileSubject.Dispose();
+    }
+
+    private void OnFileChanged(object sender, FileSystemEventArgs eventArgs)
+    {
+        lock (_watcherGate)
+        {
+            if (_disposed)
+                return;
+
+            FileSubject.OnNext(eventArgs.FullPath);
+            Debug.WriteLine($"File changed: {eventArgs.FullPath}");
+        }
     }
 }
