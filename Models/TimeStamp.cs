@@ -1,22 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace PolyhydraGames.Core.Models;
 
 public class TimeStamp
 {
-    private static Dictionary<string, TimeStamp> _stamps = new ();
+    private static readonly ConcurrentDictionary<string, TimeStamp> _stamps = new ();
 
     public static void Stamp(string stamp)
     {
-        if (_stamps.ContainsKey(stamp))
+        while (true)
         {
-            _stamps[stamp].Stamp();
-            _stamps.Remove(stamp);
-            return;
-        }
+            if (_stamps.TryAdd(stamp, new TimeStamp(stamp)))
+                return;
 
-        _stamps[stamp] = new TimeStamp(stamp);
+            if (_stamps.TryRemove(stamp, out var startedStamp))
+            {
+                startedStamp.Stamp();
+                return;
+            }
+        }
     }
     public TimeStamp(string name)
     {
