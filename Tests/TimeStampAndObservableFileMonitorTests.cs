@@ -17,6 +17,23 @@ public class TimeStampAndObservableFileMonitorTests
         Assert.That(GetActiveStamps().ContainsKey(name), Is.False);
     }
 
+    // Defines the semantics for concurrent first-use Stamp calls: TimeStamp.Stamp toggles a
+    // per-name entry atomically (TryAdd starts it, TryRemove completes it), so pairing is
+    // deterministic regardless of thread interleaving - it is NOT lossy. An odd number of
+    // concurrent calls on the same name always leaves exactly one active (started, not yet
+    // completed) entry; it never leaves the dictionary in a corrupted or ambiguous state.
+    [Test]
+    public void Stamp_ConcurrentOddCount_DeterministicallyLeavesExactlyOneActiveTimestamp()
+    {
+        var name = $"concurrent-odd-{Guid.NewGuid():N}";
+
+        Assert.DoesNotThrow(() => Parallel.For(0, 2_001, _ => TimeStamp.Stamp(name)));
+
+        Assert.That(GetActiveStamps().ContainsKey(name), Is.True,
+            "An odd number of concurrent first-use calls must deterministically leave exactly " +
+            "one active timestamp - proving the toggle pairing is not lossy under contention.");
+    }
+
     [Test]
     public void Initialize_IsIdempotent_AndDisposeReleasesTheWatcher()
     {
@@ -40,6 +57,72 @@ public class TimeStampAndObservableFileMonitorTests
             monitor.Dispose();
             Assert.That(GetWatcher(monitor), Is.Null);
             Assert.Throws<ObjectDisposedException>(() => monitor.Initialize());
+        }
+        finally
+        {
+            Directory.Delete(folder, recursive: true);
+        }
+    }
+
+    // Concurrent lifecycle coverage: hammer Initialize() and Dispose() from many threads at
+    // once on the same instance. This proves the _watcherGate lock actually serializes the
+    // two lifecycle operations - no unexpected exceptions, no leaked watcher, and the
+    // instance always ends up fully disposed once every racing call has returned.
+    [Test]
+    public void InitializeAndDispose_CalledConcurrently_NeverThrowUnexpectedlyAndEndDisposed()
+    {
+        var folder = Path.Combine(Path.GetTempPath(), $"core-models-monitor-race-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(folder);
+
+        try
+        {
+            var monitor = new ObservableFileMonitor(folder, "watched.txt");
+            var unexpected = new ConcurrentBag<Exception>();
+
+            var actions = new List<Action>();
+            for (var i = 0; i < 25; i++)
+            {
+                actions.Add(() =>
+                {
+                    try
+                    {
+                        monitor.Initialize();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // Expected when a concurrent Dispose() wins the race first.
+                    }
+                    catch (Exception ex)
+                    {
+                        unexpected.Add(ex);
+                    }
+                });
+            }
+
+            for (var i = 0; i < 25; i++)
+            {
+                actions.Add(() =>
+                {
+                    try
+                    {
+                        monitor.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        unexpected.Add(ex);
+                    }
+                });
+            }
+
+            Parallel.Invoke(actions.ToArray());
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(unexpected, Is.Empty,
+                    () => string.Join(Environment.NewLine, unexpected.Select(e => e.ToString())));
+                Assert.That(GetWatcher(monitor), Is.Null);
+                Assert.Throws<ObjectDisposedException>(() => monitor.Initialize());
+            });
         }
         finally
         {
