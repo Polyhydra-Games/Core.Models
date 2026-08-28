@@ -27,6 +27,8 @@ public class ObservableFileMonitor : IObservableFileMonitor, IDisposable
 
     public void Initialize()
     {
+        OnInitializeStarting();
+
         lock (_watcherGate)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
@@ -34,13 +36,9 @@ public class ObservableFileMonitor : IObservableFileMonitor, IDisposable
             if (_watcher is not null)
                 return;
 
-            var watcher = new FileSystemWatcher()
-            {
-                Path = _folder,
-
-                // Set the filter to the file name
-                Filter = Path.GetFileName(FilePath)
-            };
+            var watcher = CreateWatcher();
+            watcher.Path = _folder;
+            watcher.Filter = Path.GetFileName(FilePath);
 
             // Subscribe before enabling notifications so no change is missed.
             watcher.Changed += OnFileChanged;
@@ -59,6 +57,15 @@ public class ObservableFileMonitor : IObservableFileMonitor, IDisposable
         }
 
         Debug.WriteLine($"Monitoring changes to {FilePath}. Press Enter to exit.");
+    }
+
+    protected virtual void OnInitializeStarting()
+    {
+    }
+
+    protected virtual FileSystemWatcher CreateWatcher()
+    {
+        return new FileSystemWatcher();
     }
 
     protected virtual void EnableRaisingEvents(FileSystemWatcher watcher)
