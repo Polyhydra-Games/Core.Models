@@ -64,6 +64,29 @@ public class TimeStampAndObservableFileMonitorTests
         }
     }
 
+    [Test]
+    public void Initialize_WhenActivationFails_RollsBackAndCanRetry()
+    {
+        var folder = Path.Combine(Path.GetTempPath(), $"core-models-monitor-retry-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(folder);
+
+        try
+        {
+            using var monitor = new FailingFirstActivationFileMonitor(folder, "watched.txt");
+
+            Assert.Throws<IOException>(() => monitor.Initialize());
+            Assert.That(GetWatcher(monitor), Is.Null);
+
+            Assert.DoesNotThrow(() => monitor.Initialize());
+            Assert.That(GetWatcher(monitor), Is.Not.Null);
+        }
+        finally
+        {
+            if (Directory.Exists(folder))
+                Directory.Delete(folder, recursive: true);
+        }
+    }
+
     // Concurrent lifecycle coverage: hammer Initialize() and Dispose() from many threads at
     // once on the same instance. This proves the _watcherGate lock actually serializes the
     // two lifecycle operations - no unexpected exceptions, no leaked watcher, and the
@@ -140,5 +163,26 @@ public class TimeStampAndObservableFileMonitorTests
     {
         var field = typeof(ObservableFileMonitor).GetField("_watcher", BindingFlags.NonPublic | BindingFlags.Instance);
         return (FileSystemWatcher?)field!.GetValue(monitor);
+    }
+
+    private sealed class FailingFirstActivationFileMonitor : ObservableFileMonitor
+    {
+        private bool _failFirstActivation = true;
+
+        public FailingFirstActivationFileMonitor(string folder, string file)
+            : base(folder, file)
+        {
+        }
+
+        protected override void EnableRaisingEvents(FileSystemWatcher watcher)
+        {
+            if (_failFirstActivation)
+            {
+                _failFirstActivation = false;
+                throw new IOException("Simulated transient watcher activation failure.");
+            }
+
+            base.EnableRaisingEvents(watcher);
+        }
     }
 }
