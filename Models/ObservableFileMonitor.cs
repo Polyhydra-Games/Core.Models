@@ -34,7 +34,7 @@ public class ObservableFileMonitor : IObservableFileMonitor, IDisposable
             if (_watcher is not null)
                 return;
 
-            _watcher = new FileSystemWatcher()
+            var watcher = new FileSystemWatcher()
             {
                 Path = _folder,
 
@@ -43,11 +43,27 @@ public class ObservableFileMonitor : IObservableFileMonitor, IDisposable
             };
 
             // Subscribe before enabling notifications so no change is missed.
-            _watcher.Changed += OnFileChanged;
-            _watcher.EnableRaisingEvents = true;
+            watcher.Changed += OnFileChanged;
+
+            try
+            {
+                EnableRaisingEvents(watcher);
+                _watcher = watcher;
+            }
+            catch
+            {
+                watcher.Changed -= OnFileChanged;
+                watcher.Dispose();
+                throw;
+            }
         }
 
         Debug.WriteLine($"Monitoring changes to {FilePath}. Press Enter to exit.");
+    }
+
+    protected virtual void EnableRaisingEvents(FileSystemWatcher watcher)
+    {
+        watcher.EnableRaisingEvents = true;
     }
 
     public void Dispose()
