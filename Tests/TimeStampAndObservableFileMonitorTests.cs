@@ -12,7 +12,7 @@ public class TimeStampAndObservableFileMonitorTests
     {
         var name = $"concurrent-{Guid.NewGuid():N}";
 
-        Assert.DoesNotThrow(() => Parallel.For(0, 2_000, _ => TimeStamp.Stamp(name)));
+        Assert.DoesNotThrow(() => RunConcurrently(64, () => TimeStamp.Stamp(name)));
 
         Assert.That(GetActiveStamps().ContainsKey(name), Is.False);
     }
@@ -27,7 +27,7 @@ public class TimeStampAndObservableFileMonitorTests
     {
         var name = $"concurrent-odd-{Guid.NewGuid():N}";
 
-        Assert.DoesNotThrow(() => Parallel.For(0, 2_001, _ => TimeStamp.Stamp(name)));
+        Assert.DoesNotThrow(() => RunConcurrently(65, () => TimeStamp.Stamp(name)));
 
         Assert.That(GetActiveStamps().ContainsKey(name), Is.True,
             "An odd number of concurrent first-use calls must deterministically leave exactly " +
@@ -64,25 +64,24 @@ public class TimeStampAndObservableFileMonitorTests
         }
     }
 
-    // Concurrent lifecycle coverage: hammer Initialize() and Dispose() from many threads at
-    // once on the same instance. This proves the _watcherGate lock actually serializes the
-    // two lifecycle operations - no unexpected exceptions, no leaked watcher, and the
-    // instance always ends up fully disposed once every racing call has returned.
+    // Every Initialize caller waits inside Initialize before competing for _watcherGate. The
+    // monitor records each allocated watcher, so a regression that lets callers overwrite one
+    // another is detected even though _watcher is null after Dispose.
     [Test]
-    public void InitializeAndDispose_CalledConcurrently_NeverThrowUnexpectedlyAndEndDisposed()
+    public void ConcurrentInitializeAndDispose_DisposesEveryAllocatedWatcher()
     {
         var folder = Path.Combine(Path.GetTempPath(), $"core-models-monitor-race-{Guid.NewGuid():N}");
         Directory.CreateDirectory(folder);
 
         try
         {
-            var monitor = new ObservableFileMonitor(folder, "watched.txt");
+            const int initializerCount = 32;
+            using var initializeBarrier = new Barrier(initializerCount);
+            var monitor = new TrackingObservableFileMonitor(folder, "watched.txt", initializeBarrier);
             var unexpected = new ConcurrentBag<Exception>();
 
-            var actions = new List<Action>();
-            for (var i = 0; i < 25; i++)
-            {
-                actions.Add(() =>
+            var initializers = Enumerable.Range(0, initializerCount)
+                .Select(_ => Task.Factory.StartNew(() =>
                 {
                     try
                     {
@@ -96,30 +95,32 @@ public class TimeStampAndObservableFileMonitorTests
                     {
                         unexpected.Add(ex);
                     }
-                });
-            }
+                }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default))
+                .ToArray();
 
-            for (var i = 0; i < 25; i++)
+            Assert.That(Task.WaitAll(initializers, TimeSpan.FromSeconds(10)), Is.True,
+                "All concurrent Initialize callers must reach the coordinated first-use point.");
+
+            RunConcurrently(32, () =>
             {
-                actions.Add(() =>
+                try
                 {
-                    try
-                    {
-                        monitor.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        unexpected.Add(ex);
-                    }
-                });
-            }
-
-            Parallel.Invoke(actions.ToArray());
+                    monitor.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    unexpected.Add(ex);
+                }
+            });
 
             Assert.Multiple(() =>
             {
                 Assert.That(unexpected, Is.Empty,
                     () => string.Join(Environment.NewLine, unexpected.Select(e => e.ToString())));
+                Assert.That(monitor.CreatedWatchers, Has.Count.EqualTo(1),
+                    "Concurrent Initialize calls must not allocate watchers that can be overwritten.");
+                Assert.That(monitor.CreatedWatchers, Is.All.Matches<TrackingFileSystemWatcher>(watcher => watcher.IsDisposed),
+                    "Dispose must release every watcher that was allocated during concurrent initialization.");
                 Assert.That(GetWatcher(monitor), Is.Null);
                 Assert.Throws<ObjectDisposedException>(() => monitor.Initialize());
             });
@@ -140,5 +141,56 @@ public class TimeStampAndObservableFileMonitorTests
     {
         var field = typeof(ObservableFileMonitor).GetField("_watcher", BindingFlags.NonPublic | BindingFlags.Instance);
         return (FileSystemWatcher?)field!.GetValue(monitor);
+    }
+
+    private static void RunConcurrently(int workerCount, Action action)
+    {
+        using var barrier = new Barrier(workerCount);
+        var workers = Enumerable.Range(0, workerCount)
+            .Select(_ => Task.Factory.StartNew(() =>
+            {
+                barrier.SignalAndWait(TimeSpan.FromSeconds(10));
+                action();
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default))
+            .ToArray();
+
+        Assert.That(Task.WaitAll(workers, TimeSpan.FromSeconds(10)), Is.True,
+            "All workers must execute after reaching the same concurrent first-use barrier.");
+    }
+
+    private sealed class TrackingObservableFileMonitor : ObservableFileMonitor
+    {
+        private readonly Barrier _initializeBarrier;
+
+        public TrackingObservableFileMonitor(string folder, string file, Barrier initializeBarrier)
+            : base(folder, file)
+        {
+            _initializeBarrier = initializeBarrier;
+        }
+
+        public ConcurrentBag<TrackingFileSystemWatcher> CreatedWatchers { get; } = new();
+
+        protected override void OnInitializeStarting()
+        {
+            _initializeBarrier.SignalAndWait(TimeSpan.FromSeconds(10));
+        }
+
+        protected override FileSystemWatcher CreateWatcher()
+        {
+            var watcher = new TrackingFileSystemWatcher();
+            CreatedWatchers.Add(watcher);
+            return watcher;
+        }
+    }
+
+    private sealed class TrackingFileSystemWatcher : FileSystemWatcher
+    {
+        public bool IsDisposed { get; private set; }
+
+        protected override void Dispose(bool disposing)
+        {
+            IsDisposed = true;
+            base.Dispose(disposing);
+        }
     }
 }
