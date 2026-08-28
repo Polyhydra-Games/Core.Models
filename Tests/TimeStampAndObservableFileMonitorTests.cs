@@ -64,9 +64,34 @@ public class TimeStampAndObservableFileMonitorTests
         }
     }
 
+    [Test]
+    public void Initialize_WhenActivationFails_RollsBackAndCanRetry()
+    {
+        var folder = Path.Combine(Path.GetTempPath(), $"core-models-monitor-retry-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(folder);
+
+        try
+        {
+            using var monitor = new FailingFirstActivationFileMonitor(folder, "watched.txt");
+
+            Assert.Throws<IOException>(() => monitor.Initialize());
+            Assert.That(GetWatcher(monitor), Is.Null);
+
+            Assert.DoesNotThrow(() => monitor.Initialize());
+            Assert.That(GetWatcher(monitor), Is.Not.Null);
+        }
+        finally
+        {
+            if (Directory.Exists(folder))
+                Directory.Delete(folder, recursive: true);
+        }
+    }
+
     // Every Initialize caller waits inside Initialize before competing for _watcherGate. The
     // monitor records each allocated watcher, so a regression that lets callers overwrite one
-    // another is detected even though _watcher is null after Dispose.
+    // another is detected even though _watcher is null after Dispose. Also proves the
+    // _watcherGate lock serializes concurrent Initialize()/Dispose() calls on the same
+    // instance - no unexpected exceptions, no leaked watcher.
     [Test]
     public void ConcurrentInitializeAndDispose_DisposesEveryAllocatedWatcher()
     {
@@ -191,6 +216,27 @@ public class TimeStampAndObservableFileMonitorTests
         {
             IsDisposed = true;
             base.Dispose(disposing);
+        }
+    }
+
+    private sealed class FailingFirstActivationFileMonitor : ObservableFileMonitor
+    {
+        private bool _failFirstActivation = true;
+
+        public FailingFirstActivationFileMonitor(string folder, string file)
+            : base(folder, file)
+        {
+        }
+
+        protected override void EnableRaisingEvents(FileSystemWatcher watcher)
+        {
+            if (_failFirstActivation)
+            {
+                _failFirstActivation = false;
+                throw new IOException("Simulated transient watcher activation failure.");
+            }
+
+            base.EnableRaisingEvents(watcher);
         }
     }
 }
