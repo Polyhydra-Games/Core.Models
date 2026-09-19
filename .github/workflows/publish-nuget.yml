@@ -23,8 +23,8 @@ jobs:
     name: Test and pack
     if: >-
       github.event_name != 'pull_request' ||
-      (github.actor == github.repository_owner &&
-       github.event.pull_request.user.login == github.repository_owner &&
+      ((github.actor == github.repository_owner || github.actor == 'polyhydra-release-bot[bot]') &&
+       (github.event.pull_request.user.login == github.repository_owner || github.event.pull_request.user.login == 'polyhydra-release-bot[bot]') &&
        github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: [self-hosted, Linux, X64, core-models-ci]
     env:
