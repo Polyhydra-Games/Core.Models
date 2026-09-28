@@ -10,6 +10,7 @@ namespace PolyhydraGames.Core.Models.DelayTimer;
 /// </summary>
 public class DelayedTimer
 {
+    private readonly object _sync = new();
     public int StartingDelay { get; }
     public int Step { get; }
     public int MaxDelay { get; }
@@ -29,40 +30,68 @@ public class DelayedTimer
 
     public async Task Delay()
     {
-        if (CTS != null)
+        CancellationTokenSource cancellation;
+        CancellationToken token;
+        int nextDelay;
+        lock (_sync)
         {
-            throw new Exception($"{Name} - This timer is intended to only be used by one action at a time");
-        }
+            if (CTS != null)
+                throw new Exception($"{Name} - This timer is intended to only be used by one action at a time");
 
-        CTS = new CancellationTokenSource();
-        var nextDelay = CurrentDelay + Step;
-        if (nextDelay > MaxDelay)
-        {
-            CurrentDelay = MaxDelay;
-            CTS.Dispose();
-            CTS = default;
-            throw new MaximumDurationException(this);
-        }
+            cancellation = new CancellationTokenSource();
+            token = cancellation.Token;
+            CTS = cancellation;
+            nextDelay = CurrentDelay + Step;
+            if (nextDelay > MaxDelay)
+            {
+                CurrentDelay = MaxDelay;
+                CTS = null;
+                cancellation.Dispose();
+                throw new MaximumDurationException(this);
+            }
 
-        CurrentDelay = nextDelay;
+            CurrentDelay = nextDelay;
+        }
 
         try
         {
-            await Task.Delay(TimeSpan.FromSeconds(CurrentDelay), CTS.Token);
-            CTS.Dispose();
-            CTS = default;
+            await Task.Delay(TimeSpan.FromSeconds(nextDelay), token);
         }
         catch
         {
-            Reset();
+            lock (_sync)
+            {
+                if (ReferenceEquals(CTS, cancellation))
+                    CurrentDelay = StartingDelay;
+            }
+
             throw;
+        }
+        finally
+        {
+            lock (_sync)
+            {
+                if (ReferenceEquals(CTS, cancellation))
+                {
+                    CTS = null;
+                    cancellation.Dispose();
+                }
+            }
         }
 
     }
 
     public void Reset()
     {
-        CTS = null;
-        CurrentDelay = StartingDelay; 
+        lock (_sync)
+        {
+            var cancellation = CTS;
+            CTS = null;
+            CurrentDelay = StartingDelay;
+            if (cancellation == null) return;
+
+            cancellation.Cancel();
+            cancellation.Dispose();
+        }
     }
 }

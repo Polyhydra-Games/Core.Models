@@ -21,7 +21,8 @@ namespace PolyhydraGames.Core.Models.Settings
  
         public JsonSetting(ISettings settings, string key, T defaultValue = default!) : base(settings, key)
         {
-            _value = settings.GetValueOrDefault(_key, defaultValue?.ToString() ?? string.Empty).FromJson<T>();
+            // JSON null has historically flowed through this legacy value contract for reference types.
+            _value = settings.GetValueOrDefault(_key, defaultValue?.ToString() ?? string.Empty).FromJson<T>()!;
         }
     }
 #pragma warning restore CS0618

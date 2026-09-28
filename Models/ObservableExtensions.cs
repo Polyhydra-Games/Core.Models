@@ -9,40 +9,40 @@ namespace PolyhydraGames.Core.Models
     {
         /// <summary>
         /// Projects each element into an async operation and flattens the results.
-        /// Any exception inside the async operation is sent downstream (or optionally logged).
+        /// Exceptions are sent downstream by default. Supplying an error callback handles and drops them.
         /// </summary>
         public static IObservable<TResult> SelectAsync<TSource, TResult>(
             this IObservable<TSource> source,
             Func<TSource, Task<TResult>> asyncSelector,
             Action<Exception>? onError = null)
         {
-            return source.SelectMany(x =>
-                Observable.FromAsync(() => asyncSelector(x))
+            return onError == null
+                ? source.SelectMany(x => Observable.FromAsync(() => asyncSelector(x)))
+                : source.SelectMany(x => Observable.FromAsync(() => asyncSelector(x))
                     .Catch<TResult, Exception>(ex =>
                     {
-                        onError?.Invoke(ex);
+                        onError(ex);
                         return Observable.Empty<TResult>();
-                    })
-            );
+                    }));
         }
 
         /// <summary>
-        /// Fire-and-forget async side effects, ignoring results.
+        /// Async side effects whose failures are sent downstream by default. Supplying an error callback handles and drops them.
         /// </summary>
         public static IObservable<Unit> DoAsync<TSource>(
             this IObservable<TSource> source,
             Func<TSource, Task> asyncAction,
             Action<Exception>? onError = null)
         {
-            return source.SelectMany(x =>
-                Observable.FromAsync(() => asyncAction(x))
+            return onError == null
+                ? source.SelectMany(x => Observable.FromAsync(() => asyncAction(x)).Select(_ => Unit.Default))
+                : source.SelectMany(x => Observable.FromAsync(() => asyncAction(x))
                     .Select(_ => Unit.Default)
                     .Catch<Unit, Exception>(ex =>
                     {
-                        onError?.Invoke(ex);
+                        onError(ex);
                         return Observable.Empty<Unit>();
-                    })
-            );
+                    }));
         }
     }
 }

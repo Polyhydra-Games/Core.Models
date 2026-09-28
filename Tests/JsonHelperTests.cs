@@ -28,7 +28,7 @@ public class JsonHelperTests
     public void FromJson_Should_DeserializeObject()
     {
         var json = """{"Name":"Hello","Value":100,"IsActive":false}""";
-        var result = json.FromJson<TestObject>();
+        var result = json.FromJson<TestObject>() ?? throw new AssertionException("Deserialization returned null.");
         
         Assert.That(result.Name, Is.EqualTo("Hello"));
         Assert.That(result.Value, Is.EqualTo(100));
@@ -38,7 +38,7 @@ public class JsonHelperTests
     [Test]
     public void FromJson_Should_ReturnDefault_WhenEmptyString()
     {
-        var result = "".FromJson<TestObject>();
+        var result = "".FromJson<TestObject>() ?? throw new AssertionException("Default object was null.");
         
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Name, Is.EqualTo(string.Empty));
@@ -49,7 +49,7 @@ public class JsonHelperTests
     public void FromJson_Should_ReturnDefault_WhenNullString()
     {
         string? nullString = null;
-        var result = nullString.FromJson<TestObject>();
+        var result = nullString.FromJson<TestObject>() ?? throw new AssertionException("Default object was null.");
         
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Name, Is.EqualTo(string.Empty));
@@ -61,7 +61,7 @@ public class JsonHelperTests
     {
         var original = new TestObject { Name = "RoundTrip", Value = 999, IsActive = true };
         var json = original.ToJson();
-        var restored = json.FromJson<TestObject>();
+        var restored = json.FromJson<TestObject>() ?? throw new AssertionException("Round-trip result was null.");
         
         Assert.That(restored.Name, Is.EqualTo(original.Name));
         Assert.That(restored.Value, Is.EqualTo(original.Value));
@@ -72,11 +72,30 @@ public class JsonHelperTests
     public void FromJson_Should_HandleInvalidJson_WhenContinueOnErrorTrue()
     {
         var invalidJson = "not valid json at all";
-        var result = invalidJson.FromJson<TestObject>(continueOnError: true);
+        var result = invalidJson.FromJson<TestObject>(continueOnError: true)
+            ?? throw new AssertionException("Error recovery result was null.");
         
         // Should return default object due to error handling
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Name, Is.EqualTo(string.Empty));
+    }
+
+    [Test]
+    public void FromJson_Type_Should_Throw_WhenContinueOnErrorIsFalse()
+    {
+        Assert.Throws<JsonException>(() => "invalid".FromJson(typeof(TestObject), continueOnError: false));
+    }
+
+    [Test]
+    public void FromJson_Type_Should_PreserveSerializedNull()
+    {
+        Assert.That("null".FromJson(typeof(TestObject)), Is.Null);
+    }
+
+    [Test]
+    public void FromJson_Generic_Should_PreserveSerializedNull()
+    {
+        Assert.That("null".FromJson<TestObject>(), Is.Null);
     }
 
     [Test]

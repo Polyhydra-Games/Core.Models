@@ -54,7 +54,19 @@ jobs:
         run: dotnet restore Tests/PolyhydraGames.Core.Models.Test.csproj
 
       - name: Test
-        run: dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release
+        run: dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults
+
+      - name: Report coverage
+        if: always()
+        run: python3 scripts/summarize-coverage.py TestResults
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: core-models-coverage
+          path: TestResults/**/coverage.cobertura.xml
+          if-no-files-found: warn
 
       - name: Pack
         run: dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release -p:PackageVersion=${{ env.PACKAGE_VERSION }} --output artifacts/packages
