@@ -2,6 +2,7 @@
 using PolyhydraGames.Core.Interfaces;
 
 namespace PolyhydraGames.Core.Models.Serialization;
+
 using System;
 
 public class SystemTextJsonHelper : ISerializationProvider

@@ -11,8 +11,8 @@ public static class EnumDescriptionExtensions
         new(value, title, description);
 
     public static List<EnumDescription<T>> ToDescriptions<T>(this T value, Func<T, string>? getTitle = null, Func<T, string>? getDescription = null) where T : struct, Enum
-        => Enum.GetValues<T>().Select(item => 
-            ToDescription<T>(item, getTitle?.Invoke(item) ?? item.ToString(), 
+        => Enum.GetValues<T>().Select(item =>
+            ToDescription<T>(item, getTitle?.Invoke(item) ?? item.ToString(),
                 getDescription?.Invoke(item) ?? "")).ToList();
 
 }

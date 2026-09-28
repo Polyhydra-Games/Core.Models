@@ -1,4 +1,5 @@
-﻿using PolyhydraGames.Core.Interfaces;
+﻿using System;
+using PolyhydraGames.Core.Interfaces;
 
 namespace PolyhydraGames.Core.Models.Settings
 {
@@ -11,7 +12,7 @@ namespace PolyhydraGames.Core.Models.Settings
             get => _value;
             set
             {
-                if (_value?.Equals(value) ?? false)
+                if (_value?.Equals(value, StringComparison.Ordinal) ?? false)
                     return;
                 _value = value;
                 _settings.AddOrUpdateValue(_key, _value);

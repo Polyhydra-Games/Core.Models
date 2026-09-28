@@ -27,6 +27,7 @@ jobs:
        (github.event.pull_request.user.login == github.repository_owner || github.event.pull_request.user.login == 'polyhydra-release-bot[bot]') &&
        github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: [self-hosted, Linux, X64, core-models-ci]
+    timeout-minutes: 30
     env:
       TMPDIR: ${{ github.workspace }}/.runner-temp
       TMP: ${{ github.workspace }}/.runner-temp
@@ -50,22 +51,15 @@ jobs:
             9.0.x
             10.0.x
 
-      - name: Restore
-        run: dotnet restore Tests/PolyhydraGames.Core.Models.Test.csproj
+      - name: Run CI (restore, lint, test, coverage)
+        run: make ci
 
-      - name: Test
-        run: dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults
-
-      - name: Report coverage
-        if: always()
-        run: python3 scripts/summarize-coverage.py TestResults
-
-      - name: Upload coverage report
+      - name: Upload test results
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: core-models-coverage
-          path: TestResults/**/coverage.cobertura.xml
+          name: core-models-test-results
+          path: TestResults/**
           if-no-files-found: warn
 
       - name: Pack
@@ -109,7 +103,8 @@ jobs:
       - name: Restore, test, and pack release commit
         run: |
           dotnet restore Tests/PolyhydraGames.Core.Models.Test.csproj
-          dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release
+          dotnet build PolyhydraGames.Core.Models.sln --no-restore --configuration Release
+          make test
           dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release -p:PackageVersion=${{ env.PACKAGE_VERSION }} --output artifacts/packages
 
       - name: Publish to GitHub Packages

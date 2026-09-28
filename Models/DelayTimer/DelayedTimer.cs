@@ -23,7 +23,7 @@ public class DelayedTimer
         Name = name;
         StartingDelay = startingDelay;
         Step = step;
-        MaxDelay = maxDelay; 
+        MaxDelay = maxDelay;
     }
 
 
@@ -36,7 +36,7 @@ public class DelayedTimer
         lock (_sync)
         {
             if (CTS != null)
-                throw new Exception($"{Name} - This timer is intended to only be used by one action at a time");
+                throw new InvalidOperationException($"{Name} - This timer is intended to only be used by one action at a time");
 
             cancellation = new CancellationTokenSource();
             token = cancellation.Token;

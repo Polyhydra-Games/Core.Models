@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Text.Json;
 using NUnit.Framework;
@@ -70,7 +71,7 @@ public class ApiUtilityContractsTests
         {
             Status = "ready",
             Message = "All checks passed.",
-            CheckedAtUtc = DateTimeOffset.Parse("2026-05-20T12:00:00Z"),
+            CheckedAtUtc = DateTimeOffset.Parse("2026-05-20T12:00:00Z", CultureInfo.InvariantCulture),
             Checks =
             [
                 new ApiReadinessCheck

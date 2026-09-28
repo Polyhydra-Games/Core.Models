@@ -26,7 +26,7 @@ public static class JsonHelper
     }
     public static T? FromJson<T>(this string? value, bool continueOnError = true)
     {
-        if (Provider == null) throw new NullReferenceException("ISerialization provider was not set. Please initialize this before use");
+        if (Provider == null) throw new InvalidOperationException("ISerialization provider was not set. Please initialize this before use");
         if (string.IsNullOrEmpty(value))
             return CreateDefault<T>();
 
@@ -47,13 +47,13 @@ public static class JsonHelper
         var value = default(T);
         if (value == null)
         {
-            return (T?)Activator.CreateInstance(typeof(T));
+            return Activator.CreateInstance<T>();
         }
         return value;
     }
     public static string ToJson(this object value)
     {
-        if (Provider == null) throw new NullReferenceException("ISerialization provider was not set. Please initialize this before use");
+        if (Provider == null) throw new InvalidOperationException("ISerialization provider was not set. Please initialize this before use");
         return Provider.SerializeObject(value);
     }
 }

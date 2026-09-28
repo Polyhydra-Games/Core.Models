@@ -1,7 +1,7 @@
 ﻿namespace PolyhydraGames.Core.Models;
 
 public struct OneTimeUseBool
-{ 
+{
     private bool _value = true;
 
     public OneTimeUseBool()

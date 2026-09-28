@@ -5,7 +5,7 @@ namespace PolyhydraGames.Core.Models.Settings
 #pragma warning disable CS0618 // Compatibility wrapper for the legacy synchronous settings API.
     public class IntSetting : Setting, ISettingValue<int>
     {
-      
+
         private int _value;
         public int Value
         {
@@ -20,8 +20,10 @@ namespace PolyhydraGames.Core.Models.Settings
             }
         }
 
-        public IntSetting(ISettings settings, string key, int defaultValue = 0): base(settings,key){
-            Value = settings.GetValueOrDefault(key, defaultValue);}
+        public IntSetting(ISettings settings, string key, int defaultValue = 0) : base(settings, key)
+        {
+            Value = settings.GetValueOrDefault(key, defaultValue);
+        }
     }
 #pragma warning restore CS0618
 }

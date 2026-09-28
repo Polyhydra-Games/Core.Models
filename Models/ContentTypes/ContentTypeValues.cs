@@ -7,7 +7,7 @@ public static class ContentTypeValues
     public const string Edifact = "application/EDIFACT";
     public const string JavascriptObsolete = "application/javascript";
     public const string OctetStream = "application/octet-stream";
-    
+
     public const string Pdf = "application/pdf";
     public const string XhtmlXml = "application/xhtml+xml";
     public const string ShockwaveFlash = "application/x-shockwave-flash";

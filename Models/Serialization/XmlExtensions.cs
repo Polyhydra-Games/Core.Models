@@ -11,7 +11,7 @@ public static class XmlExtensions
     public static object? FromXML(this string data, Type type, bool continueOnError = true)
     {
         if (Provider == null)
-            throw new NullReferenceException("ISerialization provider was not set. Please initialize this before use");
+            throw new InvalidOperationException("ISerialization provider was not set. Please initialize this before use");
 
         try
         {
@@ -30,7 +30,7 @@ public static class XmlExtensions
     public static T? FromXML<T>(this string value, bool continueOnError = true)
     {
         if (Provider == null)
-            throw new NullReferenceException("ISerialization provider was not set. Please initialize this before use");
+            throw new InvalidOperationException("ISerialization provider was not set. Please initialize this before use");
         if (string.IsNullOrEmpty(value))
         {
             return default;
@@ -41,7 +41,7 @@ public static class XmlExtensions
     public static string ToXML(this object value)
     {
         if (Provider == null)
-            throw new NullReferenceException("ISerialization provider was not set. Please initialize this before use");
+            throw new InvalidOperationException("ISerialization provider was not set. Please initialize this before use");
         return Provider.SerializeObject(value);
     }
 

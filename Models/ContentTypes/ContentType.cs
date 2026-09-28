@@ -177,4 +177,3 @@ public enum ContentType
     [StringValue("application/vnd.mozilla.xul+xml")]
     VndMozillaXulXml,
 }
- 

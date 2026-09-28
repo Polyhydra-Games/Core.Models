@@ -95,6 +95,7 @@ public class ObservableFileMonitor : IObservableFileMonitor, IDisposable
 
         FileSubject.OnCompleted();
         FileSubject.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private void OnFileChanged(object sender, FileSystemEventArgs eventArgs)

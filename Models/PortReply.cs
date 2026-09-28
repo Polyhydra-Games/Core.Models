@@ -16,8 +16,8 @@ public class PortReply<T>
     public T? Content { get; set; }
     public override string ToString()
     {
-        var headers = Headers.Any() ? Headers.Select(x => x.Key + ":" + x.Value).Aggregate((x, y) => x + ", " + y) : string.Empty;
-        var query = Query.Any() ? Query.Select(x => x.Key + ":" + x.Value).Aggregate((x, y) => x + ", " + y) : string.Empty;
+        var headers = Headers.Count > 0 ? Headers.Select(x => x.Key + ":" + x.Value).Aggregate((x, y) => x + ", " + y) : string.Empty;
+        var query = Query.Count > 0 ? Query.Select(x => x.Key + ":" + x.Value).Aggregate((x, y) => x + ", " + y) : string.Empty;
         return $"Method: {Method} \nHeaders: {headers} \nQuery: {query} ";
     }
     public T? Data { get; set; }

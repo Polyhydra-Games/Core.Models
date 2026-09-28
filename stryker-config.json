@@ -1,0 +1,19 @@
+{
+  "stryker-config": {
+    "project": "Models/PolyhydraGames.Core.Models.csproj",
+    "test-projects": [
+      "Tests/PolyhydraGames.Core.Models.Test.csproj"
+    ],
+    "mutation-level": "Standard",
+    "reporters": [
+      "Progress",
+      "Html",
+      "Json"
+    ],
+    "thresholds": {
+      "high": 80,
+      "low": 60,
+      "break": 50
+    }
+  }
+}

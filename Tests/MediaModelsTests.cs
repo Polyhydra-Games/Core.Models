@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using NUnit.Framework;
 using PolyhydraGames.Core.Models.Media;
@@ -7,6 +8,8 @@ namespace PolyhydraGames.Core.Models.Tests;
 
 public class MediaModelsTests
 {
+    private static readonly string[] SvengoolieFilePatterns = { "*.mp4", "*.mkv" };
+
     [TestCase("mp4", ".mp4")]
     [TestCase(".MKV", ".mkv")]
     [TestCase("  FlAc  ", ".flac")]
@@ -97,7 +100,7 @@ public class MediaModelsTests
                         ExternalId = "12345",
                         DisplayName = "The Movie Database",
                         Url = "https://www.themoviedb.org/movie/12345",
-                        LastSeenAt = DateTimeOffset.Parse("2026-05-20T12:00:00Z"),
+                        LastSeenAt = DateTimeOffset.Parse("2026-05-20T12:00:00Z", CultureInfo.InvariantCulture),
                     },
                     new MediaProviderReference
                     {
@@ -219,7 +222,7 @@ public class MediaModelsTests
                 Name = "Svengoolie",
                 RootPath = "/mnt/syn2/video/TV Shows/Svengoolie",
                 Recursive = true,
-                FilePatterns = [ "*.mp4", "*.mkv" ]
+                FilePatterns = ["*.mp4", "*.mkv"]
             },
             Tags = ["svengoolie", "segments"],
             Playback = new MediaPlaylistPlaybackOptions
@@ -356,7 +359,7 @@ public class MediaModelsTests
         Assert.That(playlist, Is.Not.Null);
         Assert.That(playlist!.SourceCollectionName, Is.EqualTo("Svengoolie"));
         Assert.That(playlist.Source!.RootPath, Is.EqualTo("/mnt/syn2/video/TV Shows/Svengoolie"));
-        Assert.That(playlist.Source.FilePatterns, Is.EquivalentTo(new[] { "*.mp4", "*.mkv" }));
+        Assert.That(playlist.Source.FilePatterns, Is.EquivalentTo(SvengoolieFilePatterns));
         Assert.That(playlist.Playback.RandomOrder, Is.True);
         Assert.That(playlist.Playback.ClipLength, Is.EqualTo(TimeSpan.FromSeconds(30)));
         Assert.That(playlist.Items[0].StartOffset, Is.EqualTo(TimeSpan.FromMinutes(10)));
@@ -413,7 +416,7 @@ public class MediaModelsTests
             ExternalId = "12345",
             DisplayName = "The Movie Database",
             Url = "https://www.themoviedb.org/movie/12345",
-            LastSeenAt = DateTimeOffset.Parse("2026-05-20T12:00:00Z"),
+            LastSeenAt = DateTimeOffset.Parse("2026-05-20T12:00:00Z", CultureInfo.InvariantCulture),
             Metadata = new Dictionary<string, string>
             {
                 ["region"] = "US",

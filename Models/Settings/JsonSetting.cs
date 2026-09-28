@@ -18,7 +18,7 @@ namespace PolyhydraGames.Core.Models.Settings
 
             }
         }
- 
+
         public JsonSetting(ISettings settings, string key, T defaultValue = default!) : base(settings, key)
         {
             // JSON null has historically flowed through this legacy value contract for reference types.
