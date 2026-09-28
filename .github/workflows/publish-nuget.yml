@@ -27,20 +27,18 @@ jobs:
       ((github.actor == github.repository_owner || github.actor == 'polyhydra-release-bot[bot]') &&
        (github.event.pull_request.user.login == github.repository_owner || github.event.pull_request.user.login == 'polyhydra-release-bot[bot]') &&
        github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: [self-hosted, Linux, X64, core-models-ci]
+    runs-on: ubuntu-latest
     env:
       TMPDIR: ${{ github.workspace }}/.runner-temp
       TMP: ${{ github.workspace }}/.runner-temp
       TEMP: ${{ github.workspace }}/.runner-temp
-      DOTNET_ROOT: ${{ github.workspace }}/.dotnet
-      DOTNET_INSTALL_DIR: ${{ github.workspace }}/.dotnet
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
     steps:
       - name: Checkout Core.Models
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Prepare isolated tool directories
-        run: mkdir -p "$TMPDIR" "$DOTNET_ROOT" "$NUGET_PACKAGES"
+        run: mkdir -p "$TMPDIR" "$NUGET_PACKAGES"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
@@ -74,7 +72,7 @@ jobs:
 
       - name: Clean isolated tool directories
         if: always()
-        run: rm -rf "$TMPDIR" "$DOTNET_ROOT" "${NUGET_PACKAGES%/packages}"
+        run: rm -rf "$TMPDIR" "${NUGET_PACKAGES%/packages}"
 
   package:
     name: Test and package verified release
@@ -86,8 +84,6 @@ jobs:
       TMPDIR: ${{ github.workspace }}/.runner-temp
       TMP: ${{ github.workspace }}/.runner-temp
       TEMP: ${{ github.workspace }}/.runner-temp
-      DOTNET_ROOT: ${{ github.workspace }}/.dotnet
-      DOTNET_INSTALL_DIR: ${{ github.workspace }}/.dotnet
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
       PACKAGE_VERSION: 2.0.1.${{ github.run_number }}
     steps:
@@ -95,10 +91,12 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Prepare isolated tool directories
-        run: mkdir -p "$TMPDIR" "$DOTNET_ROOT" "$NUGET_PACKAGES"
+        run: mkdir -p "$TMPDIR" "$NUGET_PACKAGES"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.tool_cache }}/dotnet
         with:
           dotnet-version: |
             8.0.x
@@ -154,7 +152,7 @@ jobs:
 
       - name: Clean isolated tool directories
         if: always()
-        run: rm -rf "$TMPDIR" "$DOTNET_ROOT" "${NUGET_PACKAGES%/packages}"
+        run: rm -rf "$TMPDIR" "${NUGET_PACKAGES%/packages}"
 
   publish-nuget-org:
     needs: package
@@ -165,8 +163,6 @@ jobs:
       contents: read
       id-token: write
     env:
-      DOTNET_ROOT: ${{ github.workspace }}/.dotnet
-      DOTNET_INSTALL_DIR: ${{ github.workspace }}/.dotnet
       PACKAGE_VERSION: ${{ needs.package.outputs.package_version }}
     steps:
       - name: Start from an empty workspace
@@ -175,6 +171,8 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
         with:
           dotnet-version: |
             8.0.x
@@ -251,8 +249,6 @@ jobs:
       contents: read
       packages: write
     env:
-      DOTNET_ROOT: ${{ github.workspace }}/.dotnet
-      DOTNET_INSTALL_DIR: ${{ github.workspace }}/.dotnet
       PACKAGE_VERSION: ${{ needs.package.outputs.package_version }}
     steps:
       - name: Start from an empty workspace
@@ -261,6 +257,8 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.tool_cache }}/dotnet
         with:
           dotnet-version: |
             8.0.x

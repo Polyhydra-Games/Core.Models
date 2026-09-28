@@ -120,7 +120,7 @@ var obj = json.FromJson<MyType>();
 <PackageReference Include="PolyhydraGames.Core.Models" Version="2.0.1.*" />
 ```
 
-The package is published publicly on nuget.org and packages.polyhydragames.com. Green `main` runs publish `2.0.1.<run_number>` through nuget.org Trusted Publishing.
+The package has historical public releases on nuget.org and packages.polyhydragames.com. The workflow is configured to publish `2.0.1.<run_number>` from green `main` runs through nuget.org Trusted Publishing once the operator policy is configured and the first live run is verified.
 
 ### Target Frameworks
 - **Main package:** `net8.0` and `net9.0` (multi-target)

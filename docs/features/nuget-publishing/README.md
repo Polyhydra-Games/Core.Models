@@ -44,6 +44,6 @@ The package is public on nuget.org. The enabled GitHub Actions workflow tests, p
 
 ## Validation
 
-- [x] Confirm the workflow publishes a `2.0.1.<run>` package from a green `main` push or dispatch.
+- [ ] Confirm the workflow publishes a `2.0.1.<run>` package from a green `main` push or dispatch.
 - [x] Keep OIDC permission only on the package-only `publish-nuget-org` job; pass packages through the run-scoped cache.
 - [x] Switch downstream apps away from sibling `ProjectReference` usage once the new package is available.
