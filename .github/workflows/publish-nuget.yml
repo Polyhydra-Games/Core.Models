@@ -17,12 +17,13 @@ permissions:
   contents: read
 
 env:
-  PACKAGE_VERSION: 2.0.0.${{ github.run_number }}
+  PACKAGE_VERSION: 2.0.1.${{ github.run_number }}
+
 jobs:
-  build:
-    name: Test and pack
+  validate-pull-request:
+    name: Validate pull request
     if: >-
-      github.event_name != 'pull_request' ||
+      github.event_name == 'pull_request' &&
       ((github.actor == github.repository_owner || github.actor == 'polyhydra-release-bot[bot]') &&
        (github.event.pull_request.user.login == github.repository_owner || github.event.pull_request.user.login == 'polyhydra-release-bot[bot]') &&
        github.event.pull_request.head.repo.full_name == github.repository)
@@ -34,7 +35,6 @@ jobs:
       DOTNET_ROOT: ${{ github.workspace }}/.dotnet
       DOTNET_INSTALL_DIR: ${{ github.workspace }}/.dotnet
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-
     steps:
       - name: Checkout Core.Models
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -53,8 +53,11 @@ jobs:
       - name: Restore
         run: dotnet restore Tests/PolyhydraGames.Core.Models.Test.csproj
 
+      - name: Build
+        run: dotnet build Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release
+
       - name: Test
-        run: dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults
+        run: dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-build --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults
 
       - name: Report coverage
         if: always()
@@ -62,27 +65,25 @@ jobs:
 
       - name: Upload coverage report
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: core-models-coverage
           path: TestResults/**/coverage.cobertura.xml
           if-no-files-found: warn
 
-      - name: Pack
-        run: dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release -p:PackageVersion=${{ env.PACKAGE_VERSION }} --output artifacts/packages
-
       - name: Clean isolated tool directories
         if: always()
         run: rm -rf "$TMPDIR" "$DOTNET_ROOT" "${NUGET_PACKAGES%/packages}"
 
   publish:
-    name: Publish verified package
+    name: Test and publish verified package
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: build
     runs-on: [self-hosted, Linux, X64, core-models-ci]
     environment: nuget-release
     permissions:
       contents: read
+      id-token: write
       packages: write
     env:
       TMPDIR: ${{ github.workspace }}/.runner-temp
@@ -106,13 +107,63 @@ jobs:
             9.0.x
             10.0.x
 
-      - name: Restore, test, and pack release commit
+      - name: Restore
+        run: dotnet restore Tests/PolyhydraGames.Core.Models.Test.csproj
+
+      - name: Build
+        run: dotnet build Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-build --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults
+
+      - name: Pack PolyhydraGames.Core.Models
+        run: dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release -p:PackageVersion=${{ env.PACKAGE_VERSION }} --output artifacts/packages
+
+      - name: Guard against stale nuget.org versions
+        env:
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+        shell: bash
         run: |
-          dotnet restore Tests/PolyhydraGames.Core.Models.Test.csproj
-          dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release
-          dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release -p:PackageVersion=${{ env.PACKAGE_VERSION }} --output artifacts/packages
+          set -euo pipefail
+          package_id='PolyhydraGames.Core.Models'
+          package_id_lower="$(printf '%s' "$package_id" | tr '[:upper:]' '[:lower:]')"
+          index_file="$(mktemp)"
+          trap 'rm -f "$index_file"' EXIT
+          status="$(curl -sS -o "$index_file" -w '%{http_code}' "https://api.nuget.org/v3-flatcontainer/${package_id_lower}/index.json")"
+          case "$status" in
+            200) ;;
+            404) printf 'No published nuget.org versions found; allowing %s.\n' "$PACKAGE_VERSION"; exit 0 ;;
+            *) echo "::error::Could not query nuget.org version index (HTTP $status)."; exit 1 ;;
+          esac
+          highest="$(python3 - "$index_file" <<'PY' | sort -V | tail -n 1
+          import json, sys
+          with open(sys.argv[1], encoding="utf-8") as index:
+              print("\n".join(json.load(index).get("versions", [])))
+          PY
+          )"
+          if [[ -z "$highest" ]]; then
+            printf 'No published nuget.org versions found; allowing %s.\n' "$PACKAGE_VERSION"
+            exit 0
+          fi
+          ordered="$(printf '%s\n%s\n' "$highest" "$PACKAGE_VERSION" | sort -V)"
+          greatest="$(printf '%s\n' "$ordered" | tail -n 1)"
+          if [[ "$greatest" != "$PACKAGE_VERSION" || "$highest" == "$PACKAGE_VERSION" ]]; then
+            echo "::error::Computed package version $PACKAGE_VERSION is not greater than nuget.org's highest version $highest."
+            exit 1
+          fi
+          printf 'Version guard passed: %s is greater than nuget.org %s.\n' "$PACKAGE_VERSION" "$highest"
+
+      - name: Authenticate to nuget.org
+        id: nuget-login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: lancer1977
+
+      - name: Publish to nuget.org
+        run: dotnet nuget push "artifacts/packages/PolyhydraGames.Core.Models.${{ env.PACKAGE_VERSION }}.nupkg" --source "https://api.nuget.org/v3/index.json" --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}"
 
       - name: Publish to GitHub Packages
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -122,6 +173,7 @@ jobs:
           done
 
       - name: Publish to nuget.polyhydragames.com
+        continue-on-error: true
         env:
           BAGET_API_KEY: ${{ secrets.BAGET_API_KEY }}
         run: |
@@ -130,14 +182,18 @@ jobs:
             dotnet nuget push "$package" --source "https://nuget.polyhydragames.com/v3/index.json" --api-key "$BAGET_API_KEY" --skip-duplicate
           done
 
-      - name: Publish to nuget.org
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: |
-          test -n "$NUGET_API_KEY"
-          for package in artifacts/packages/*.nupkg; do
-            dotnet nuget push "$package" --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY" --skip-duplicate
-          done
+      - name: Report coverage
+        if: always()
+        run: python3 scripts/summarize-coverage.py TestResults
+
+      - name: Upload coverage report
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: core-models-coverage
+          path: TestResults/**/coverage.cobertura.xml
+          if-no-files-found: warn
 
       - name: Clean isolated tool directories
         if: always()

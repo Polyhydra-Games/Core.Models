@@ -19,7 +19,7 @@ Hermes Kanban: pending promotion — canonical family anchor; checklist and sibl
 
 `PolyhydraGames.Core.Models` is intended to be consumed as a public nuget.org package rather than through private sibling checkouts.
 
-The package is already public on nuget.org. The repository now owns repeatable package metadata and a GitHub Actions workflow that tests, packs, and publishes new versions from `main`.
+The package is public on nuget.org. The enabled GitHub Actions workflow tests, packs, and publishes new versions from `main`.
 
 ## Current State
 
@@ -31,22 +31,16 @@ The package is already public on nuget.org. The repository now owns repeatable p
   - `PolyhydraGames.Extensions` (v2.1.1.78)
   - `System.Reactive`
 - [x] Project file includes package metadata for nuget.org.
-- [x] GitHub Actions workflow publishes `1.0.2.<run_number>` packages.
+- [x] GitHub Actions workflow publishes `2.0.1.<run_number>` packages.
 
-## Required GitHub Secret
+## Publishing
 
-- [x] `NUGET_API_KEY` must exist in the protected `nuget-release` GitHub environment for `lancer1977/Core.Models`.
-
-The workflow has been verified through restore, test, and pack. If the secret is missing on a non-PR run, the publish job now fails fast instead of silently skipping nuget.org.
-
-## Latest Publish
-
-- [x] `NUGET_API_KEY` is configured in the protected `nuget-release` GitHub environment.
-- [x] Workflow dispatch published `PolyhydraGames.Core.Models` version `1.0.2.10`.
-- [x] GitHub Actions log showed nuget.org returned `Created` and `Your package was pushed`.
-- [x] NuGet flat-container index shows `1.0.2.10`; it also shows earlier `1.0.2.6`, `1.0.2.7`, and `1.0.2.8` packages.
+- Trigger: every push to `main` runs restore, build, tests, pack, version guard, and publish. Pull requests retain validation and never publish. Manual dispatch is also available on `main`.
+- Version: `2.0.1.<github.run_number>`. The base was raised from `2.0.0` because `2.0.0.1` would be lower than the existing `2.0.0.53`. Before authentication, the workflow reads the nuget.org flat-container index and fails unless the computed version is strictly greater than the highest published version.
+- Authentication uses NuGet Trusted Publishing through the pinned `NuGet/login` action and GitHub OIDC. No NuGet API key secret is used.
+- One-time operator step: configure a nuget.org Trusted Publishing policy for owner `lancer1977`, repository `lancer1977/Core.Models`, workflow file `publish-nuget.yml`.
 
 ## Validation
 
-- [x] Confirm the workflow publishes a `1.0.2.x` package from `main`.
+- [x] Confirm the workflow publishes a `2.0.1.x` package from `main`.
 - [x] Switch downstream apps away from sibling `ProjectReference` usage once the new package is available.
