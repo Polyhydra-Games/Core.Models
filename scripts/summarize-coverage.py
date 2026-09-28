@@ -3,6 +3,7 @@
 
 from pathlib import Path
 import os
+import re
 import sys
 import xml.etree.ElementTree as ET
 
@@ -19,11 +20,14 @@ for report in reports:
     for package in document.findall(".//package"):
         name = package.get("name", "unknown")
         values = totals.setdefault(name, [0, 0, 0, 0])
-        # Cobertura stores package totals as coverage rates, not hit counts.
-        values[0] += round(float(package.get("line-rate", "0")) * int(document.get("lines-valid", "0")))
-        values[1] += int(document.get("lines-valid", "0"))
-        values[2] += round(float(package.get("branch-rate", "0")) * int(document.get("branches-valid", "0")))
-        values[3] += int(document.get("branches-valid", "0"))
+        for line in package.findall("./classes/class/lines/line"):
+            values[1] += 1
+            values[0] += int(line.get("hits", "0")) > 0
+            coverage = line.get("condition-coverage", "")
+            match = re.search(r"\((\d+)/(\d+)\)", coverage)
+            if match:
+                values[2] += int(match.group(1))
+                values[3] += int(match.group(2))
 
 lines = ["### Production assembly coverage", "", "| Assembly | Line | Branch |", "| --- | ---: | ---: |"]
 for assembly, (line_hit, line_total, branch_hit, branch_total) in sorted(totals.items()):

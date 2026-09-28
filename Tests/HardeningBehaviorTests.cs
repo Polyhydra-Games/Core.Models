@@ -103,6 +103,24 @@ public sealed class HardeningBehaviorTests
     }
 
     [Test]
+    public async Task ExternalCancellation_ResetsDelayBeforeNextWait()
+    {
+        var timer = new DelayedTimer("external-cancel", 0, 1, 3);
+        var pending = timer.Delay();
+        var cancellation = timer.CTS ?? throw new AssertionException("Delay did not create a cancellation source.");
+
+        cancellation.Cancel();
+
+        Assert.ThrowsAsync<TaskCanceledException>(async () => await pending);
+        Assert.That(timer.CurrentDelay, Is.Zero);
+
+        var next = timer.Delay();
+        Assert.That(timer.CurrentDelay, Is.EqualTo(1));
+        timer.Reset();
+        Assert.ThrowsAsync<TaskCanceledException>(async () => await next);
+    }
+
+    [Test]
     public void TryRunAction_ContinuesAfterServiceFailure()
     {
         var manager = new AnalyticsManager();

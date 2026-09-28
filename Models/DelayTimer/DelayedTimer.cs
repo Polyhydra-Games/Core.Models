@@ -57,6 +57,16 @@ public class DelayedTimer
         {
             await Task.Delay(TimeSpan.FromSeconds(nextDelay), token);
         }
+        catch
+        {
+            lock (_sync)
+            {
+                if (ReferenceEquals(CTS, cancellation))
+                    CurrentDelay = StartingDelay;
+            }
+
+            throw;
+        }
         finally
         {
             lock (_sync)
