@@ -37,8 +37,9 @@ The package is public on nuget.org. The enabled GitHub Actions workflow tests, p
 
 - Trigger: pushes to `main` and manual dispatch on `main` run validation, packaging, and publishing. Pull requests retain validation and never publish. Concurrency may coalesce queued default-branch runs; the newest green commit of a burst is published.
 - The `package` job checks out the repository, restores, builds, tests, computes `2.0.1.<github.run_number>`, and packs exactly one package into `publish-out/`. It hands the package to downstream jobs through `actions/cache`.
-- The `publish-nuget-org` job restores the package cache, verifies the exact package and version, runs the Python-backed nuget.org version guard, authenticates through the pinned `NuGet/login` action and GitHub OIDC, and pushes to nuget.org. This job does not check out or run repository code. No NuGet API key secret is used.
-- BaGet and GitHub Packages pushes run in a separate non-OIDC job and are non-blocking.
+- Both downstream publishing jobs first clear the retained runner workspace, install the same .NET 8, 9, and 10 SDKs inside their own job, then restore the run-scoped package cache. Neither job checks out repository code or changes into a repository path.
+- The `publish-nuget-org` job verifies the exact package and version, runs the Python-backed nuget.org version guard with isolated `python3 -I`, authenticates through the pinned `NuGet/login` action and GitHub OIDC, and pushes to nuget.org. It has no package publishing secret; the OIDC action supplies the push credential.
+- BaGet and GitHub Packages pushes run in the independent `publish-mirrors` non-OIDC job. Each push is non-blocking, and the job is not a dependency of `publish-nuget-org`.
 - One-time operator step: configure a nuget.org Trusted Publishing policy for owner `lancer1977`, repository `lancer1977/Core.Models`, workflow file `publish-nuget.yml`.
 
 ## Validation
