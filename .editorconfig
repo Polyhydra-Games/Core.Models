@@ -11,13 +11,11 @@ dotnet_diagnostic.CA1707.severity = none
 # overload, to prove both public entry points behave the same way. Not a real finding.
 dotnet_diagnostic.CA2263.severity = none
 
-[Models/CSVExtensions.cs]
-# CA2201: CSVExtensions.GetProvider() throwing NullReferenceException("...provider was not set...")
-# is relied on verbatim by Tests/HardeningBehaviorTests.cs (Provider_CanBeReadWhileProviderIsChangedConcurrently),
-# which catches NullReferenceException specifically. Changing the exception type is an observable
-# behavior break for consumers of the published package (build-standard rule 2: no API/behavior
-# regressions beyond this ticket's scope). JsonHelper/XmlExtensions had the equivalent throw fixed
-# to InvalidOperationException since nothing pins their exception type.
+[{Models/CSVExtensions.cs,Models/JsonHelper.cs,Models/Serialization/XmlExtensions.cs}]
+# CA2201: the serializer entry points throw NullReferenceException("...provider was not set...") when no
+# ISerialization provider is configured. Tests/HardeningBehaviorTests.cs catches that exact type, and
+# consumers of the published package may too; changing it is a behavior break outside this ticket
+# (build-standard rule 2). Kept consistent across all three serializers.
 dotnet_diagnostic.CA2201.severity = none
 
 [Models/ObservableFileMonitor.cs]
