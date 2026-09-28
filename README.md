@@ -117,10 +117,10 @@ var obj = json.FromJson<MyType>();
 
 ### Install via NuGet
 ```xml
-<PackageReference Include="PolyhydraGames.Core.Models" Version="2.0.0.*" />
+<PackageReference Include="PolyhydraGames.Core.Models" Version="2.0.1.*" />
 ```
 
-The package is published publicly on nuget.org and packages.polyhydragames.com. New `main` builds publish `2.0.0.<run_number>` after the release environment gates pass.
+The package is published publicly on nuget.org and packages.polyhydragames.com. Green `main` runs publish `2.0.1.<run_number>` through nuget.org Trusted Publishing.
 
 ### Target Frameworks
 - **Main package:** `net8.0` and `net9.0` (multi-target)

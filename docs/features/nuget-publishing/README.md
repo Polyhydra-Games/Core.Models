@@ -35,12 +35,14 @@ The package is public on nuget.org. The enabled GitHub Actions workflow tests, p
 
 ## Publishing
 
-- Trigger: every push to `main` runs restore, build, tests, pack, version guard, and publish. Pull requests retain validation and never publish. Manual dispatch is also available on `main`.
-- Version: `2.0.1.<github.run_number>`. The base was raised from `2.0.0` because `2.0.0.1` would be lower than the existing `2.0.0.53`. Before authentication, the workflow reads the nuget.org flat-container index and fails unless the computed version is strictly greater than the highest published version.
-- Authentication uses NuGet Trusted Publishing through the pinned `NuGet/login` action and GitHub OIDC. No NuGet API key secret is used.
+- Trigger: pushes to `main` and manual dispatch on `main` run validation, packaging, and publishing. Pull requests retain validation and never publish. Concurrency may coalesce queued default-branch runs; the newest green commit of a burst is published.
+- The `package` job checks out the repository, restores, builds, tests, computes `2.0.1.<github.run_number>`, and packs exactly one package into `publish-out/`. It hands the package to downstream jobs through `actions/cache`.
+- The `publish-nuget-org` job restores the package cache, verifies the exact package and version, runs the Python-backed nuget.org version guard, authenticates through the pinned `NuGet/login` action and GitHub OIDC, and pushes to nuget.org. This job does not check out or run repository code. No NuGet API key secret is used.
+- BaGet and GitHub Packages pushes run in a separate non-OIDC job and are non-blocking.
 - One-time operator step: configure a nuget.org Trusted Publishing policy for owner `lancer1977`, repository `lancer1977/Core.Models`, workflow file `publish-nuget.yml`.
 
 ## Validation
 
-- [x] Confirm the workflow publishes a `2.0.1.x` package from `main`.
+- [x] Confirm the workflow publishes a `2.0.1.<run>` package from a green `main` push or dispatch.
+- [x] Keep OIDC permission only on the package-only `publish-nuget-org` job; pass packages through the run-scoped cache.
 - [x] Switch downstream apps away from sibling `ProjectReference` usage once the new package is available.
