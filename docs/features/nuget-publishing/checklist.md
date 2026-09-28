@@ -29,6 +29,8 @@ Canonical doc: [README](./README.md). This checklist mirrors the canonical famil
 - [x] Use `2.0.1.<run_number>` for automated public package versions.
 - [x] Install .NET 8, .NET 9, and .NET 10 in CI for the package target frameworks and tests.
 - [x] Split repository execution and OIDC publishing: the `package` job validates and packs, then hands off `publish-out/` through `actions/cache`; only `publish-nuget-org` receives `id-token: write`.
+- [x] Isolate publishing credentials on `[self-hosted, nuget-core-models-publish]`; keep build and test execution on `[self-hosted, Linux, X64, core-models-ci]`. The publish runner never executes build, test, or pull request code.
+- [x] Verify package generation in pull request validation with `dotnet pack` into runner temp storage, separate from the release cache handoff.
 - [x] Use nuget.org Trusted Publishing through the pinned `NuGet/login` action. No NuGet API key secret is configured.
 
 ## Release

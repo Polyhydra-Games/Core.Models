@@ -57,6 +57,9 @@ jobs:
       - name: Test
         run: dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-build --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults
 
+      - name: Verify package can be packed
+        run: dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release --output "$RUNNER_TEMP/pr-pack"
+
       - name: Report coverage
         if: always()
         run: python3 scripts/summarize-coverage.py TestResults
@@ -157,7 +160,7 @@ jobs:
   publish-nuget-org:
     needs: package
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, Linux, X64, core-models-ci]
+    runs-on: [self-hosted, nuget-core-models-publish]
     timeout-minutes: 15
     permissions:
       contents: read
@@ -244,7 +247,7 @@ jobs:
   publish-mirrors:
     needs: package
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, Linux, X64, core-models-ci]
+    runs-on: [self-hosted, nuget-core-models-publish]
     permissions:
       contents: read
       packages: write
