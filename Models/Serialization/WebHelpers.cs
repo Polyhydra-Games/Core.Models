@@ -17,7 +17,7 @@ public static class WebHelpers
     /// <param name="url"></param>
     /// <param name="encoding"></param>
     /// <returns></returns>
-    public static async Task<IEnumerable<T>> GetItemsAsync<T>(this HttpClient client, string url, Serialize encoding)
+    public static async Task<IEnumerable<T>?> GetItemsAsync<T>(this HttpClient client, string url, Serialize encoding)
     {
         try
         {

@@ -388,6 +388,8 @@ release/
 coverage/
 CoverageResults/
 TestResults/
+StrykerOutput/
+dotnet-tools.json
 node_modules/
 
 # Logs / temp
