@@ -4,71 +4,115 @@
 from __future__ import annotations
 
 import argparse
-import re
 from pathlib import Path
+
+import yaml
 
 PUBLISH_LABEL = "nuget-core-models-publish"
 PUBLISH_JOBS = {"publish-nuget-org", "publish-mirrors"}
-PUBLISH_WORKFLOW = "publish-nuget"
+PUBLISH_WORKFLOW_NAMES = {"publish-nuget.yml", "publish-nuget.yaml"}
 
 
-def job_blocks(workflow: str) -> dict[str, str]:
-    jobs_match = re.search(r"^jobs:\s*$", workflow, re.MULTILINE)
-    if not jobs_match:
-        raise ValueError("workflow has no top-level jobs section")
-    tail = workflow[jobs_match.end() :]
-    matches = list(re.finditer(r"^  ([A-Za-z0-9_-]+):\s*$", tail, re.MULTILINE))
-    return {
-        match.group(1): tail[match.end() : matches[index + 1].start() if index + 1 < len(matches) else len(tail)]
-        for index, match in enumerate(matches)
-    }
+class WorkflowLoader(yaml.SafeLoader):
+    """Safe YAML loader that handles GitHub's YAML 1.2-style `on` key."""
 
 
-def runner_labels(block: str) -> list[str] | None:
-    """Return literal runner labels for inline or block-list runs-on values."""
-    lines = block.splitlines()
-    for index, line in enumerate(lines):
-        match = re.match(r"^    runs-on:\s*(.*)$", line)
-        if not match:
-            continue
-        value = match.group(1).strip()
-        if value.startswith("[") and value.endswith("]"):
-            return [part.strip().strip("\"'") for part in value[1:-1].split(",")]
-        if value:
-            return [value.strip("\"'")]
+WorkflowLoader.yaml_implicit_resolvers = {
+    key: [(tag, regexp) for tag, regexp in resolvers if tag != "tag:yaml.org,2002:bool"]
+    for key, resolvers in yaml.SafeLoader.yaml_implicit_resolvers.items()
+}
 
-        labels: list[str] = []
-        for continuation in lines[index + 1 :]:
-            if continuation.strip() and not continuation.startswith("      "):
-                break
-            item = re.match(r"^      -\s*(.*?)\s*$", continuation)
-            if item:
-                labels.append(item.group(1).strip("\"'"))
-        return labels
-    return None
+
+def _workflow_document(workflow: str) -> dict:
+    try:
+        document = yaml.load(workflow, Loader=WorkflowLoader)
+    except yaml.YAMLError as error:
+        raise ValueError(f"workflow YAML is invalid: {error}") from error
+    if not isinstance(document, dict):
+        raise ValueError("workflow must be a YAML mapping")
+    return document
+
+
+def _labels(value: object) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list) and all(isinstance(item, str) for item in value):
+        return value
+    raise ValueError("runs-on labels must be a string or a list of strings")
+
+
+def _runner_labels(value: object) -> list[str] | None:
+    if isinstance(value, str) or isinstance(value, list):
+        return _labels(value)
+    if isinstance(value, dict):
+        if set(value) - {"group", "labels"} or "labels" not in value:
+            raise ValueError("runs-on mapping must contain labels and only optional group")
+        group = value.get("group")
+        if group is not None and not isinstance(group, str):
+            raise ValueError("runs-on group must be a string")
+        return _labels(value["labels"])
+    raise ValueError("runs-on must be a string, list, or group/labels mapping")
+
+
+def _workflow_scope(path: Path) -> bool:
+    return path.parent.as_posix().endswith(".github/workflows") and path.name in PUBLISH_WORKFLOW_NAMES
 
 
 def validate(workflow: str, *, require_publish_jobs: bool = True) -> list[str]:
     errors: list[str] = []
-    jobs = job_blocks(workflow)
+    try:
+        document = _workflow_document(workflow)
+        jobs = document.get("jobs")
+        if not isinstance(jobs, dict) or not all(isinstance(name, str) and isinstance(job, dict) for name, job in jobs.items()):
+            raise ValueError("top-level jobs must be a mapping of job IDs to mappings")
+    except ValueError as error:
+        return [str(error)]
+
     if require_publish_jobs:
         for name in sorted(PUBLISH_JOBS):
-            labels = runner_labels(jobs[name]) if name in jobs else None
-            if labels is None:
+            job = jobs.get(name)
+            if job is None:
                 errors.append(f"missing required publishing job: {name}")
-            elif labels != ["self-hosted", PUBLISH_LABEL]:
+                continue
+            try:
+                labels = _runner_labels(job.get("runs-on"))
+            except ValueError as error:
+                errors.append(f"{name} has invalid runs-on: {error}")
+                continue
+            if labels != ["self-hosted", PUBLISH_LABEL]:
                 errors.append(f"{name} must use exactly [self-hosted, {PUBLISH_LABEL}]")
 
-    for name, block in jobs.items():
-        labels = runner_labels(block) or []
-        if any(PUBLISH_LABEL in label for label in labels) and name not in PUBLISH_JOBS:
-            errors.append(f"job {name} must not use publish runner label {PUBLISH_LABEL}")
+    for name, job in jobs.items():
+        if "runs-on" not in job:
+            errors.append(f"job {name} has no runs-on value")
+            continue
+        try:
+            runs_on = job["runs-on"]
+            labels = _runner_labels(runs_on)
+        except ValueError as error:
+            errors.append(f"job {name} has invalid runs-on: {error}")
+            continue
+        if isinstance(runs_on, str) and ("${{" in runs_on or "}}" in runs_on):
+            errors.append(f"job {name} has dynamic runs-on value that cannot be verified")
+            continue
+        if isinstance(runs_on, list) and any(not isinstance(item, str) or "${{" in item or "}}" in item for item in runs_on):
+            errors.append(f"job {name} has dynamic runs-on value that cannot be verified")
+            continue
+        if isinstance(runs_on, dict):
+            if any(not isinstance(item, str) or "${{" in item or "}}" in item for item in labels):
+                errors.append(f"job {name} has dynamic runs-on value that cannot be verified")
+                continue
+        if any(PUBLISH_LABEL in label for label in labels):
+            if not (require_publish_jobs and name in PUBLISH_JOBS and labels == ["self-hosted", PUBLISH_LABEL]):
+                errors.append(f"job {name} must not use publish runner label {PUBLISH_LABEL}")
     return errors
 
 
 def workflow_errors(path: Path) -> list[str]:
     try:
-        errors = validate(path.read_text(encoding="utf-8"), require_publish_jobs=path.stem == PUBLISH_WORKFLOW)
+        text = path.read_text(encoding="utf-8")
+        scoped_publisher = _workflow_scope(path)
+        errors = validate(text, require_publish_jobs=scoped_publisher)
     except (OSError, ValueError) as error:
         return [f"{path}: {error}"]
     return [f"{path}: {error}" for error in errors]
