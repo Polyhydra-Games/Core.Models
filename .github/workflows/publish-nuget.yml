@@ -17,30 +17,33 @@ permissions:
   contents: read
 
 env:
-  PACKAGE_VERSION: 2.0.0.${{ github.run_number }}
+  PACKAGE_ID: PolyhydraGames.Core.Models
+
 jobs:
-  build:
-    name: Test and pack
+  validate-pull-request:
+    name: Validate pull request
     if: >-
-      github.event_name != 'pull_request' ||
+      github.event_name == 'pull_request' &&
       ((github.actor == github.repository_owner || github.actor == 'polyhydra-release-bot[bot]') &&
        (github.event.pull_request.user.login == github.repository_owner || github.event.pull_request.user.login == 'polyhydra-release-bot[bot]') &&
        github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: [self-hosted, Linux, X64, core-models-ci]
+    runs-on: ubuntu-latest
     env:
       TMPDIR: ${{ github.workspace }}/.runner-temp
       TMP: ${{ github.workspace }}/.runner-temp
       TEMP: ${{ github.workspace }}/.runner-temp
-      DOTNET_ROOT: ${{ github.workspace }}/.dotnet
-      DOTNET_INSTALL_DIR: ${{ github.workspace }}/.dotnet
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-
     steps:
       - name: Checkout Core.Models
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Prepare isolated tool directories
-        run: mkdir -p "$TMPDIR" "$DOTNET_ROOT" "$NUGET_PACKAGES"
+        run: mkdir -p "$TMPDIR" "$NUGET_PACKAGES"
+
+      - name: Check publish runner policy
+        run: |
+          python3 scripts/check_publish_runner_policy.py --repo-root "$GITHUB_WORKSPACE"
+          python3 -m unittest scripts/test_publish_runner_policy.py
 
       - name: Setup .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
@@ -53,8 +56,14 @@ jobs:
       - name: Restore
         run: dotnet restore Tests/PolyhydraGames.Core.Models.Test.csproj
 
+      - name: Build
+        run: dotnet build Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release
+
       - name: Test
-        run: dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults
+        run: dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-build --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults
+
+      - name: Verify package can be packed
+        run: dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release --output "$RUNNER_TEMP/pr-pack"
 
       - name: Report coverage
         if: always()
@@ -62,83 +71,239 @@ jobs:
 
       - name: Upload coverage report
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: core-models-coverage
           path: TestResults/**/coverage.cobertura.xml
           if-no-files-found: warn
 
-      - name: Pack
-        run: dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release -p:PackageVersion=${{ env.PACKAGE_VERSION }} --output artifacts/packages
-
       - name: Clean isolated tool directories
         if: always()
-        run: rm -rf "$TMPDIR" "$DOTNET_ROOT" "${NUGET_PACKAGES%/packages}"
+        run: rm -rf "$TMPDIR" "${NUGET_PACKAGES%/packages}"
 
-  publish:
-    name: Publish verified package
+  package:
+    name: Test and package verified release
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: build
     runs-on: [self-hosted, Linux, X64, core-models-ci]
-    environment: nuget-release
-    permissions:
-      contents: read
-      packages: write
+    outputs:
+      package_version: ${{ steps.package-version.outputs.package_version }}
     env:
       TMPDIR: ${{ github.workspace }}/.runner-temp
       TMP: ${{ github.workspace }}/.runner-temp
       TEMP: ${{ github.workspace }}/.runner-temp
-      DOTNET_ROOT: ${{ github.workspace }}/.dotnet
-      DOTNET_INSTALL_DIR: ${{ github.workspace }}/.dotnet
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      PACKAGE_VERSION: 2.0.1.${{ github.run_number }}
     steps:
       - name: Checkout Core.Models
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Prepare isolated tool directories
-        run: mkdir -p "$TMPDIR" "$DOTNET_ROOT" "$NUGET_PACKAGES"
+        run: mkdir -p "$TMPDIR" "$NUGET_PACKAGES"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.tool_cache }}/dotnet
         with:
           dotnet-version: |
             8.0.x
             9.0.x
             10.0.x
 
-      - name: Restore, test, and pack release commit
+      - name: Restore
+        run: dotnet restore Tests/PolyhydraGames.Core.Models.Test.csproj
+
+      - name: Build
+        run: dotnet build Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-build --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults
+
+      - name: Set package version output
+        id: package-version
+        run: echo "package_version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Pack PolyhydraGames.Core.Models
+        run: dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release -p:PackageVersion="$PACKAGE_VERSION" --output publish-out
+
+      - name: Verify packed package
+        shell: bash
         run: |
-          dotnet restore Tests/PolyhydraGames.Core.Models.Test.csproj
-          dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --no-restore --configuration Release
-          dotnet pack Models/PolyhydraGames.Core.Models.csproj --no-restore --configuration Release -p:PackageVersion=${{ env.PACKAGE_VERSION }} --output artifacts/packages
+          set -euo pipefail
+          shopt -s nullglob
+          files=(publish-out/*.nupkg)
+          expected="publish-out/${PACKAGE_ID}.${PACKAGE_VERSION}.nupkg"
+          if [[ ${#files[@]} -ne 1 || "${files[0]}" != "$expected" ]]; then
+            echo "::error::Expected exactly $expected, found: ${files[*]:-(none)}"
+            exit 1
+          fi
+
+      - name: Hand package to the publish job
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: publish-out
+          key: nuget-org-package-${{ github.run_id }}
+
+      - name: Report coverage
+        if: always()
+        run: python3 scripts/summarize-coverage.py TestResults
+
+      - name: Upload coverage report
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: core-models-coverage
+          path: TestResults/**/coverage.cobertura.xml
+          if-no-files-found: warn
+
+      - name: Clean isolated tool directories
+        if: always()
+        run: rm -rf "$TMPDIR" "${NUGET_PACKAGES%/packages}"
+
+  publish-nuget-org:
+    needs: package
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, nuget-core-models-publish]
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PACKAGE_VERSION: ${{ needs.package.outputs.package_version }}
+    steps:
+      - name: Start from an empty workspace
+        shell: bash
+        run: find "$GITHUB_WORKSPACE" -mindepth 1 -delete
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Receive package from the package job
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: publish-out
+          key: nuget-org-package-${{ github.run_id }}
+          fail-on-cache-miss: true
+
+      - name: Verify handed-off package
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(publish-out/*.nupkg)
+          expected="publish-out/${PACKAGE_ID}.${PACKAGE_VERSION}.nupkg"
+          if [[ ${#files[@]} -ne 1 || "${files[0]}" != "$expected" ]]; then
+            echo "::error::Expected exactly $expected, found: ${files[*]:-(none)}"
+            exit 1
+          fi
+
+      - name: Guard against stale nuget.org versions
+        env:
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_id='PolyhydraGames.Core.Models'
+          package_id_lower="$(printf '%s' "$package_id" | tr '[:upper:]' '[:lower:]')"
+          index_file="$(mktemp)"
+          trap 'rm -f "$index_file"' EXIT
+          status="$(curl -sS -o "$index_file" -w '%{http_code}' "https://api.nuget.org/v3-flatcontainer/${package_id_lower}/index.json")"
+          case "$status" in
+            200) ;;
+            404) printf 'No published nuget.org versions found; allowing %s.\n' "$PACKAGE_VERSION"; exit 0 ;;
+            *) echo "::error::Could not query nuget.org version index (HTTP $status)."; exit 1 ;;
+          esac
+          highest="$(python3 -I - "$index_file" <<'PY' | sort -V | tail -n 1
+          import json, sys
+          with open(sys.argv[1], encoding="utf-8") as index:
+              print("\n".join(json.load(index).get("versions", [])))
+          PY
+          )"
+          if [[ -z "$highest" ]]; then
+            printf 'No published nuget.org versions found; allowing %s.\n' "$PACKAGE_VERSION"
+            exit 0
+          fi
+          ordered="$(printf '%s\n%s\n' "$highest" "$PACKAGE_VERSION" | sort -V)"
+          greatest="$(printf '%s\n' "$ordered" | tail -n 1)"
+          if [[ "$greatest" != "$PACKAGE_VERSION" || "$highest" == "$PACKAGE_VERSION" ]]; then
+            echo "::error::Computed package version $PACKAGE_VERSION is not greater than nuget.org's highest version $highest."
+            exit 1
+          fi
+          printf 'Version guard passed: %s is greater than nuget.org %s.\n' "$PACKAGE_VERSION" "$highest"
+
+      - name: Authenticate to nuget.org
+        id: nuget-login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: lancer1977
+
+      - name: Publish to nuget.org
+        run: dotnet nuget push "publish-out/${PACKAGE_ID}.${PACKAGE_VERSION}.nupkg" --source "https://api.nuget.org/v3/index.json" --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}"
+
+  publish-mirrors:
+    needs: package
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, nuget-core-models-publish]
+    permissions:
+      contents: read
+      packages: write
+    env:
+      PACKAGE_VERSION: ${{ needs.package.outputs.package_version }}
+    steps:
+      - name: Start from an empty workspace
+        shell: bash
+        run: find "$GITHUB_WORKSPACE" -mindepth 1 -delete
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.tool_cache }}/dotnet
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Receive package from the package job
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: publish-out
+          key: nuget-org-package-${{ github.run_id }}
+          fail-on-cache-miss: true
+
+      - name: Verify handed-off package
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(publish-out/*.nupkg)
+          expected="publish-out/${PACKAGE_ID}.${PACKAGE_VERSION}.nupkg"
+          if [[ ${#files[@]} -ne 1 || "${files[0]}" != "$expected" ]]; then
+            echo "::error::Expected exactly $expected, found: ${files[*]:-(none)}"
+            exit 1
+          fi
 
       - name: Publish to GitHub Packages
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           test -n "$GITHUB_TOKEN"
-          for package in artifacts/packages/*.nupkg; do
-            dotnet nuget push "$package" --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key "$GITHUB_TOKEN" --skip-duplicate
-          done
+          dotnet nuget push "publish-out/${PACKAGE_ID}.${PACKAGE_VERSION}.nupkg" --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key "$GITHUB_TOKEN" --skip-duplicate
 
       - name: Publish to nuget.polyhydragames.com
+        continue-on-error: true
         env:
           BAGET_API_KEY: ${{ secrets.BAGET_API_KEY }}
         run: |
           test -n "$BAGET_API_KEY"
-          for package in artifacts/packages/*.nupkg; do
-            dotnet nuget push "$package" --source "https://nuget.polyhydragames.com/v3/index.json" --api-key "$BAGET_API_KEY" --skip-duplicate
-          done
-
-      - name: Publish to nuget.org
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: |
-          test -n "$NUGET_API_KEY"
-          for package in artifacts/packages/*.nupkg; do
-            dotnet nuget push "$package" --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY" --skip-duplicate
-          done
-
-      - name: Clean isolated tool directories
-        if: always()
-        run: rm -rf "$TMPDIR" "$DOTNET_ROOT" "${NUGET_PACKAGES%/packages}"
+          dotnet nuget push "publish-out/${PACKAGE_ID}.${PACKAGE_VERSION}.nupkg" --source "https://nuget.polyhydragames.com/v3/index.json" --api-key "$BAGET_API_KEY" --skip-duplicate

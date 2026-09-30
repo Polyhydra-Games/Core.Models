@@ -19,7 +19,7 @@ Hermes Kanban: pending promotion — canonical family anchor; checklist and sibl
 
 `PolyhydraGames.Core.Models` is intended to be consumed as a public nuget.org package rather than through private sibling checkouts.
 
-The package is already public on nuget.org. The repository now owns repeatable package metadata and a GitHub Actions workflow that tests, packs, and publishes new versions from `main`.
+The package is public on nuget.org. The enabled GitHub Actions workflow tests, packs, and publishes new versions from `main`.
 
 ## Current State
 
@@ -31,22 +31,20 @@ The package is already public on nuget.org. The repository now owns repeatable p
   - `PolyhydraGames.Extensions` (v2.1.1.78)
   - `System.Reactive`
 - [x] Project file includes package metadata for nuget.org.
-- [x] GitHub Actions workflow publishes `1.0.2.<run_number>` packages.
+- [x] GitHub Actions workflow publishes `2.0.1.<run_number>` packages.
 
-## Required GitHub Secret
+## Publishing
 
-- [x] `NUGET_API_KEY` must exist in the protected `nuget-release` GitHub environment for `lancer1977/Core.Models`.
-
-The workflow has been verified through restore, test, and pack. If the secret is missing on a non-PR run, the publish job now fails fast instead of silently skipping nuget.org.
-
-## Latest Publish
-
-- [x] `NUGET_API_KEY` is configured in the protected `nuget-release` GitHub environment.
-- [x] Workflow dispatch published `PolyhydraGames.Core.Models` version `1.0.2.10`.
-- [x] GitHub Actions log showed nuget.org returned `Created` and `Your package was pushed`.
-- [x] NuGet flat-container index shows `1.0.2.10`; it also shows earlier `1.0.2.6`, `1.0.2.7`, and `1.0.2.8` packages.
+- Trigger: pushes to `main` and manual dispatch on `main` run validation, packaging, and publishing. Pull requests retain validation and never publish. Concurrency may coalesce queued default-branch runs; the newest green commit of a burst is published.
+- The `package` job checks out the repository, restores, builds, tests, computes `2.0.1.<github.run_number>`, and packs exactly one package into `publish-out/`. It hands the package to downstream jobs through `actions/cache`.
+- Two runner roles are used. `package` runs on `[self-hosted, Linux, X64, core-models-ci]` and executes checked-out build and test code. `publish-nuget-org` and `publish-mirrors` run only on `[self-hosted, nuget-core-models-publish]`, a dedicated runner that never executes build, test, or pull request code. Keeping publishing credentials on a separate host prevents compromised build code from persisting on the host that receives the nuget.org OIDC token. The publish runner is provisioned by [lancer1977/homelab-gitops#1028](https://github.com/lancer1977/homelab-gitops/issues/1028) and [#1029](https://github.com/lancer1977/homelab-gitops/issues/1029). No other workflow job may use the publish label.
+- Both downstream publishing jobs first clear the retained runner workspace, install the same .NET 8, 9, and 10 SDKs inside their own job, then restore the run-scoped package cache. Neither job checks out repository code or changes into a repository path.
+- The `publish-nuget-org` job verifies the exact package and version, runs the Python-backed nuget.org version guard with isolated `python3 -I`, authenticates through the pinned `NuGet/login` action and GitHub OIDC, and pushes to nuget.org. It has no package publishing secret; the OIDC action supplies the push credential.
+- BaGet and GitHub Packages pushes run in the independent `publish-mirrors` non-OIDC job. Each push is non-blocking, and the job is not a dependency of `publish-nuget-org`.
+- One-time operator step: configure a nuget.org Trusted Publishing policy for owner `lancer1977`, repository `lancer1977/Core.Models`, workflow file `publish-nuget.yml`.
 
 ## Validation
 
-- [x] Confirm the workflow publishes a `1.0.2.x` package from `main`.
+- [ ] Confirm the workflow publishes a `2.0.1.<run>` package from a green `main` push or dispatch.
+- [x] Keep OIDC permission only on the package-only `publish-nuget-org` job; pass packages through the run-scoped cache.
 - [x] Switch downstream apps away from sibling `ProjectReference` usage once the new package is available.
