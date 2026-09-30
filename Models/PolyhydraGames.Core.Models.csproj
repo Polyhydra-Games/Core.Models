@@ -3,8 +3,6 @@
 	<PropertyGroup>
 		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<Nullable>enable</Nullable>
-		<NoWarn>$(NoWarn);1591</NoWarn>
 		<PackageId>PolyhydraGames.Core.Models</PackageId>
 		<VersionPrefix>2.0.1</VersionPrefix>
 		<Version>2.0.1</Version>

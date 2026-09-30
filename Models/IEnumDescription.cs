@@ -1,4 +1,5 @@
 ﻿namespace PolyhydraGames.Core.Models;
+
 public interface IEnumDescription
 {
     /// <summary>

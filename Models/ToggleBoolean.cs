@@ -37,6 +37,6 @@ namespace PolyhydraGames.Core.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
- 
+
     }
 }

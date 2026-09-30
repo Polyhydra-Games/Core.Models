@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace PolyhydraGames.Core.Models.Test; 
+namespace PolyhydraGames.Core.Models.Test;
+
 public static class TestHelpers
 {
     public static IConfiguration GetConfig()

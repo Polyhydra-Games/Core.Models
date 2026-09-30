@@ -47,7 +47,7 @@ public static class JsonHelper
         var value = default(T);
         if (value == null)
         {
-            return (T?)Activator.CreateInstance(typeof(T));
+            return Activator.CreateInstance<T>();
         }
         return value;
     }

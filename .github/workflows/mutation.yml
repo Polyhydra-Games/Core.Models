@@ -1,0 +1,53 @@
+name: Mutation testing
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly, Monday 08:00 UTC.
+    - cron: "0 8 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  mutate:
+    name: Stryker mutation score
+    runs-on: [self-hosted, Linux, X64, core-models-ci]
+    timeout-minutes: 60
+    env:
+      TMPDIR: ${{ github.workspace }}/.runner-temp
+      TMP: ${{ github.workspace }}/.runner-temp
+      TEMP: ${{ github.workspace }}/.runner-temp
+      DOTNET_ROOT: ${{ github.workspace }}/.dotnet
+      DOTNET_INSTALL_DIR: ${{ github.workspace }}/.dotnet
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+    steps:
+      - name: Checkout Core.Models
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Prepare isolated tool directories
+        run: mkdir -p "$TMPDIR" "$DOTNET_ROOT" "$NUGET_PACKAGES"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Restore, build, and mutate
+        run: make restore build mutate
+
+      - name: Upload Stryker report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: core-models-mutation-report
+          path: StrykerOutput/**
+          if-no-files-found: warn
+
+      - name: Clean isolated tool directories
+        if: always()
+        run: rm -rf "$TMPDIR" "$DOTNET_ROOT" "${NUGET_PACKAGES%/packages}"

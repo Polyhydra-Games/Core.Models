@@ -1,0 +1,43 @@
+root = true
+
+[*.cs]
+
+# Test projects may relax test-appropriate rules that don't apply to shipped library code.
+[Tests/**.cs]
+# CA1707: NUnit test method names use underscores by convention (Method_Should_Behavior). Style only.
+dotnet_diagnostic.CA1707.severity = none
+# CA2263: these specific call sites intentionally exercise the non-generic Type-based overload
+# (FromCSV(string, Type, bool) / FromJson(string, Type, bool)) side-by-side with the generic
+# overload, to prove both public entry points behave the same way. Not a real finding.
+dotnet_diagnostic.CA2263.severity = none
+
+[{Models/CSVExtensions.cs,Models/JsonHelper.cs,Models/Serialization/XmlExtensions.cs}]
+# CA2201: the serializer entry points throw NullReferenceException("...provider was not set...") when no
+# ISerialization provider is configured. Tests/HardeningBehaviorTests.cs catches that exact type, and
+# consumers of the published package may too; changing it is a behavior break outside this ticket
+# (build-standard rule 2). Kept consistent across all three serializers.
+dotnet_diagnostic.CA2201.severity = none
+
+[Models/ObservableFileMonitor.cs]
+# CA1051: `public readonly string FilePath` is a published public field. Converting it to a property
+# is a field<->property conversion on a public member, explicitly forbidden by build-standard rule 2.
+dotnet_diagnostic.CA1051.severity = none
+
+[Models/Settings/Setting.cs]
+# CA1051: `_settings`/`_key` are protected fields on the public abstract Setting base class. Converting
+# them to properties is a field<->property conversion on a protected member, explicitly forbidden by
+# build-standard rule 2.
+dotnet_diagnostic.CA1051.severity = none
+
+[Models/Media/Playlists/MediaPlaybackQueue.cs]
+# CA1711: renaming the published MediaPlaybackQueue record because its name ends in "Queue" is a
+# public type rename, explicitly forbidden by build-standard rule 2.
+dotnet_diagnostic.CA1711.severity = none
+
+[Models/**.cs]
+# CS1591: PolyhydraGames.Core.Models sets GenerateDocumentationFile=true but the public surface
+# (contracts, DTOs, extension methods) was never documented. Writing real XML docs for the whole
+# public API is out of scope for this build-standard pass; suppressing here rather than reintroducing
+# the previous silent, unjustified <NoWarn>1591</NoWarn>. Flagged as a deviation in the PR/report -
+# real documentation is follow-up work, not covered by this change.
+dotnet_diagnostic.CS1591.severity = none

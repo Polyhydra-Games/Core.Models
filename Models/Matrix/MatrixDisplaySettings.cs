@@ -145,11 +145,11 @@ public static class MatrixDisplaySettingsSchema
         {
             var settings = JsonSerializer.Deserialize<MatrixDisplaySettings>(json);
             if (settings == null) return false;
-            
+
             var reSerialized = JsonSerializer.Serialize(settings);
             var reDeserialized = JsonSerializer.Deserialize<MatrixDisplaySettings>(reSerialized);
-            
-            return reDeserialized != null && 
+
+            return reDeserialized != null &&
                    JsonSerializer.Serialize(reDeserialized) == reSerialized;
         }
         catch

@@ -10,7 +10,7 @@ public class MatrixDisplaySettingsTests
     public void Default_CreatesValidSettings()
     {
         var settings = MatrixDisplaySettings.CreateDefault();
-        
+
         Assert.That(settings, Is.Not.Null);
         Assert.That(settings.Words, Is.Not.Empty);
         Assert.That(settings.Speed, Is.InRange(10, 200));
@@ -48,7 +48,7 @@ public class MatrixDisplaySettingsTests
     {
         var json = JsonSerializer.Serialize(MatrixDisplaySettings.CreateDefault());
         var result = MatrixDisplaySettingsSchema.ValidateRoundTrip(json);
-        
+
         Assert.That(result, Is.True);
     }
 
@@ -56,7 +56,7 @@ public class MatrixDisplaySettingsTests
     public void Schema_GetSchema_ReturnsValidJson()
     {
         var schema = MatrixDisplaySettingsSchema.GetSchema();
-        
+
         Assert.That(schema, Is.Not.Null);
         Assert.That(schema, Does.Contain("MatrixDisplaySettings"));
         Assert.That(schema, Does.Contain("words"));

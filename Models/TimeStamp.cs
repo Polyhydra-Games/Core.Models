@@ -5,7 +5,7 @@ namespace PolyhydraGames.Core.Models;
 
 public class TimeStamp
 {
-    private static readonly ConcurrentDictionary<string, TimeStamp> _stamps = new ();
+    private static readonly ConcurrentDictionary<string, TimeStamp> _stamps = new();
 
     public static void Stamp(string stamp)
     {
@@ -34,7 +34,7 @@ public class TimeStamp
 
     public string Stamp()
     {
-        LastStamp = DateTime.Now; 
+        LastStamp = DateTime.Now;
         return ToString();
     }
     public override string ToString()

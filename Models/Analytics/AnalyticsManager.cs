@@ -10,12 +10,13 @@ namespace PolyhydraGames.Core.Models.Analytics
     /// Service to handle communicating with multiple analytics classes.
     /// </summary>
     ///  
-    public class AnalyticsManager : IAnalyticsManager{
+    public class AnalyticsManager : IAnalyticsManager
+    {
         public IEnumerable<IAnalytics> Services => SnapshotServices();
         private readonly List<IAnalytics> _services;
         private readonly object _sync = new();
 
-        public AnalyticsManager() => _services = new List<IAnalytics> ();
+        public AnalyticsManager() => _services = new List<IAnalytics>();
 
         /// <summary>
         /// Adds the service to the manager.
@@ -25,14 +26,15 @@ namespace PolyhydraGames.Core.Models.Analytics
         {
             lock (_sync) _services.Add(analytics);
         }
-		
+
         /// <summary>
         /// Runs an action on all registered analytics implementations.
         /// </summary>
         /// <param name="action">Action.</param>
-        public void RunAction(Action<IAnalytics> action){
+        public void RunAction(Action<IAnalytics> action)
+        {
             foreach (var item in SnapshotServices())
-                action (item);
+                action(item);
         }
 
         public bool TryRunAction(Action<IAnalytics> action)

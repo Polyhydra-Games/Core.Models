@@ -5,7 +5,7 @@ using System.Reactive.Subjects;
 
 namespace PolyhydraGames.Core.Models;
 
-public class SubjectObservable<T> : IObservable<T>
+public class SubjectObservable<T> : IObservable<T>, IDisposable
 {
     private readonly bool _checkEquality;
     private T _value = default!;
@@ -49,6 +49,7 @@ public class SubjectObservable<T> : IObservable<T>
     public void Dispose()
     {
         _subject.Dispose();
+        GC.SuppressFinalize(this);
     }
 
 }

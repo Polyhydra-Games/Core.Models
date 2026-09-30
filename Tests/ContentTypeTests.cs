@@ -22,10 +22,10 @@ public class ContentTypeTests
         TestCase(ContentType.MultipartFormData, "multipart/form-data"),
         TestCase(ContentType.WwwFormUrlencoded, "application/x-www-form-urlencoded"),
 
-        // Add more content types as needed
+    // Add more content types as needed
 
     ]
-    public void ContentTypeEnumProducesrightStringType(ContentType type, string expected) 
+    public void ContentTypeEnumProducesrightStringType(ContentType type, string expected)
     {
         Assert.That(type.ToContentTypeString() == expected);
     }

@@ -389,7 +389,7 @@ coverage/
 CoverageResults/
 TestResults/
 StrykerOutput/
-dotnet-tools.json
+*.trx
 node_modules/
 
 # Logs / temp

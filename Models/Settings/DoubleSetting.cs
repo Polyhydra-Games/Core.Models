@@ -4,7 +4,7 @@ namespace PolyhydraGames.Core.Models.Settings
 {
 #pragma warning disable CS0618 // Compatibility wrapper for the legacy synchronous settings API.
     public class DoubleSetting : Setting, ISettingValue<double>
-    { 
+    {
         private double _value;
         public double Value
         {
@@ -19,8 +19,8 @@ namespace PolyhydraGames.Core.Models.Settings
             }
         }
 
-        public DoubleSetting(ISettings settings, string key, double defaultValue = 0) : base(settings,key)
-        { 
+        public DoubleSetting(ISettings settings, string key, double defaultValue = 0) : base(settings, key)
+        {
             Value = settings.GetValueOrDefault(key, defaultValue);
         }
     }

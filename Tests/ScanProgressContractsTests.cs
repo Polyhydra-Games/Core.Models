@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Text.Json;
 using NUnit.Framework;
@@ -23,8 +24,8 @@ public class ScanProgressContractsTests
             IndexedFiles = 40,
             SkippedFiles = 2,
             FailedFiles = 0,
-            StartedAtUtc = DateTimeOffset.Parse("2026-05-20T12:00:00Z"),
-            UpdatedAtUtc = DateTimeOffset.Parse("2026-05-20T12:10:00Z"),
+            StartedAtUtc = DateTimeOffset.Parse("2026-05-20T12:00:00Z", CultureInfo.InvariantCulture),
+            UpdatedAtUtc = DateTimeOffset.Parse("2026-05-20T12:10:00Z", CultureInfo.InvariantCulture),
             Complete = false,
             Metadata = new Dictionary<string, string>
             {
@@ -49,8 +50,8 @@ public class ScanProgressContractsTests
             ScanId = "scan:001",
             RootId = "syn2-video",
             RootName = "Synology Video",
-            StartedAtUtc = DateTimeOffset.Parse("2026-05-20T12:00:00Z"),
-            CompletedAtUtc = DateTimeOffset.Parse("2026-05-20T12:20:00Z"),
+            StartedAtUtc = DateTimeOffset.Parse("2026-05-20T12:00:00Z", CultureInfo.InvariantCulture),
+            CompletedAtUtc = DateTimeOffset.Parse("2026-05-20T12:20:00Z", CultureInfo.InvariantCulture),
             TotalFiles = 100,
             IndexedFiles = 95,
             SkippedFiles = 4,
@@ -83,7 +84,7 @@ public class ScanProgressContractsTests
             FullPath = "/mnt/syn2/video/TV Shows/Svengoolie/The Killer Shrews.mp4",
             Kind = MediaKind.Video,
             Availability = MediaAvailability.Available,
-            IndexedAtUtc = DateTimeOffset.Parse("2026-05-20T12:10:00Z"),
+            IndexedAtUtc = DateTimeOffset.Parse("2026-05-20T12:10:00Z", CultureInfo.InvariantCulture),
             Checksum = "sha256:abc123",
             Metadata = new Dictionary<string, string>
             {

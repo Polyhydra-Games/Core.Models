@@ -10,7 +10,7 @@ public static class TestFixtures
     {
         return Host.CreateDefaultBuilder()
             .ConfigureServices((ctx, services) =>
-            { 
+            {
                 registrations.Invoke(ctx, services);
                 services.AddLogging(x =>
                 {

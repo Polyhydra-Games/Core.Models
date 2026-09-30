@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Text.Json;
 using NUnit.Framework;
@@ -20,7 +21,7 @@ public class QueueRequestContractsTests
             SourcePlaylistId = "playlist:svengoolie",
             SourcePlaylistName = "Svengoolie",
             RequestedBy = "operator:alex",
-            RequestedAtUtc = DateTimeOffset.Parse("2026-05-20T12:00:00Z"),
+            RequestedAtUtc = DateTimeOffset.Parse("2026-05-20T12:00:00Z", CultureInfo.InvariantCulture),
             Append = false,
             InsertAtIndex = 0,
             Items =
@@ -75,8 +76,8 @@ public class QueueRequestContractsTests
             Name = "Friday Night Queue",
             SourcePlaylistId = "playlist:svengoolie",
             RequestedBy = "operator:alex",
-            CreatedAtUtc = DateTimeOffset.Parse("2026-05-20T12:00:00Z"),
-            UpdatedAtUtc = DateTimeOffset.Parse("2026-05-20T12:05:00Z"),
+            CreatedAtUtc = DateTimeOffset.Parse("2026-05-20T12:00:00Z", CultureInfo.InvariantCulture),
+            UpdatedAtUtc = DateTimeOffset.Parse("2026-05-20T12:05:00Z", CultureInfo.InvariantCulture),
             ActiveQueueItemId = "queue-item:1",
             Items =
             [
@@ -91,8 +92,8 @@ public class QueueRequestContractsTests
                         Title = "The Killer Shrews",
                         RelativePath = "video/01-killer-shrews.mp4"
                     },
-                    QueuedAtUtc = DateTimeOffset.Parse("2026-05-20T12:00:00Z"),
-                    StartedAtUtc = DateTimeOffset.Parse("2026-05-20T12:05:00Z")
+                    QueuedAtUtc = DateTimeOffset.Parse("2026-05-20T12:00:00Z", CultureInfo.InvariantCulture),
+                    StartedAtUtc = DateTimeOffset.Parse("2026-05-20T12:05:00Z", CultureInfo.InvariantCulture)
                 }
             ],
             Metadata = new Dictionary<string, string>

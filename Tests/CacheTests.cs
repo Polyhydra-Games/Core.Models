@@ -9,11 +9,11 @@ public class CacheTests
     [Test]
     public void NullValue_Should_Be_Expired()
     {
-        var cache = new Cache<string>(null,TimeSpan.FromSeconds(10));
+        var cache = new Cache<string>(null, TimeSpan.FromSeconds(10));
         Assert.That(cache.IsExpired, Is.True);
         cache.Value = "Hello";
-        
-        Assert.That(cache.IsExpired, Is.False); 
+
+        Assert.That(cache.IsExpired, Is.False);
     }
 
     [Test]
@@ -27,7 +27,7 @@ public class CacheTests
     public void Value_ShouldReturnSetValue_WhenExpirationLengthZero()
     {
         var cache = new Cache<int>(42, TimeSpan.Zero);
-        Assert.That(42==cache.Value);
+        Assert.That(42 == cache.Value);
     }
 
     [Test]
@@ -43,7 +43,7 @@ public class CacheTests
     {
         var cache = new Cache<string>("Active", TimeSpan.FromSeconds(14));
         Console.WriteLine(cache.Value);
-        Assert.That("Active"== cache.Value);
+        Assert.That("Active" == cache.Value);
     }
 
     [Test]
@@ -76,7 +76,7 @@ public class CacheTests
         Assert.That(123 == cache.Value);
     }
 
-    public void WriteLine(string? message)
+    public static void WriteLine(string? message)
     {
         message = "#NULL####";
         Debug.WriteLine(message);

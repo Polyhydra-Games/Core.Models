@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using NUnit.Framework;
@@ -405,7 +406,7 @@ public class StronglyTypedIdentifierTests
 
         public override string ToString()
         {
-            return Value.ToString();
+            return Value.ToString(CultureInfo.InvariantCulture);
         }
     }
 
@@ -424,7 +425,7 @@ public class StronglyTypedIdentifierTests
 
         public override string ToString()
         {
-            return Value.ToString();
+            return Value.ToString(CultureInfo.InvariantCulture);
         }
     }
 
@@ -517,7 +518,7 @@ public class StronglyTypedIdentifierTests
 
         public override string ToString()
         {
-            return Value.ToString();
+            return Value.ToString(CultureInfo.InvariantCulture);
         }
 
         public static explicit operator TestNumericId(int value)
@@ -557,7 +558,7 @@ public class StronglyTypedIdentifierTests
 
         public override string ToString()
         {
-            return Value.ToString();
+            return Value.ToString(CultureInfo.InvariantCulture);
         }
 
         public static explicit operator TestSnowflakeId(long value)
