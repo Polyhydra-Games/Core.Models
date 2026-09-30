@@ -26,17 +26,19 @@ Canonical doc: [README](./README.md). This checklist mirrors the canonical famil
 - [x] Add NuGet package metadata to the project file.
 - [x] Add README packaging metadata.
 - [x] Add a GitHub Actions workflow for restore, test, pack, and publish.
-- [x] Use `1.0.2.<run_number>` for the next automated public package line.
+- [x] Use `2.0.1.<run_number>` for automated public package versions.
 - [x] Install .NET 8, .NET 9, and .NET 10 in CI for the package target frameworks and tests.
-- [x] Fail the publish job on `main` when `NUGET_API_KEY` is missing so nuget.org publishing cannot be skipped silently.
+- [x] Split repository execution and OIDC publishing: the `package` job validates and packs, then hands off `publish-out/` through `actions/cache`; only `publish-nuget-org` receives `id-token: write`.
+- [x] Isolate publishing credentials on `[self-hosted, nuget-core-models-publish]`; keep build and test execution on `[self-hosted, Linux, X64, core-models-ci]`. The publish runner never executes build, test, or pull request code.
+- [x] Verify package generation in pull request validation with `dotnet pack` into runner temp storage, separate from the release cache handoff.
+- [x] Use nuget.org Trusted Publishing through the pinned `NuGet/login` action. No NuGet API key secret is configured.
 
 ## Release
 
 - [x] Confirm GitHub Actions restore, test, and pack succeed.
-- [x] Confirm publish currently fails because `NUGET_API_KEY` is not set.
-- [x] Add `NUGET_API_KEY` to the protected `nuget-release` GitHub environment.
-- [x] Push to `main`.
-- [x] Confirm GitHub Actions publish step receives `Created` from nuget.org.
+- [ ] Configure a nuget.org Trusted Publishing policy for owner `lancer1977`, repository `lancer1977/Core.Models`, workflow file `publish-nuget.yml`.
+- [ ] Push or dispatch on `main` after the workflow change is merged.
+- [ ] Confirm the GitHub Actions publish step succeeds through OIDC.
 - [x] Confirm the package appears in the nuget.org public flat-container index.
 
 ## Downstream
