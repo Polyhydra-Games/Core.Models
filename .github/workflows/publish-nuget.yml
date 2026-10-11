@@ -45,6 +45,18 @@ jobs:
           python3 scripts/check_publish_runner_policy.py --repo-root "$GITHUB_WORKSPACE"
           python3 -m unittest scripts/test_publish_runner_policy.py
 
+      - name: Require a release note for shipped changes
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          SKIP_NOTE: ${{ contains(github.event.pull_request.labels.*.name, 'no-release-note') }}
+        run: |
+          git fetch --no-tags --depth=200 origin "$BASE_REF"
+          git diff --name-only "origin/$BASE_REF" HEAD > "$RUNNER_TEMP/changed-files.txt"
+          python3 -m unittest scripts/test_check_release_notes.py
+          if [ "$SKIP_NOTE" = "true" ]; then flag=--skip; fi
+          python3 scripts/check_release_notes.py "$RUNNER_TEMP/changed-files.txt" ${flag:-}
+
       - name: Setup .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
