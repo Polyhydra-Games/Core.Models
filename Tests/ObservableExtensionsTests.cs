@@ -1,3 +1,4 @@
+#pragma warning disable CA1861 // inline expected arrays are idiomatic in NUnit assertions
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;

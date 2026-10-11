@@ -128,7 +128,7 @@ public sealed class BareCatchCharacterizationTests
         {
             if (value == "format") throw new FormatException();
             if (value == "arg") throw new ArgumentException("arg");
-            if (value is null) throw new ArgumentNullException(nameof(value));
+            ArgumentNullException.ThrowIfNull(value);
             Value = value;
         }
         public string Value { get; }
@@ -138,7 +138,7 @@ public sealed class BareCatchCharacterizationTests
     {
         public ThrowingIntId(int value)
         {
-            if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
+            ArgumentOutOfRangeException.ThrowIfZero(value);
             if (value < 0) throw new FormatException();
             Value = value;
         }

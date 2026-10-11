@@ -1,3 +1,4 @@
+#pragma warning disable CA1861 // inline expected arrays are idiomatic in NUnit assertions
 using NUnit.Framework;
 
 namespace PolyhydraGames.Core.Models.Test;
