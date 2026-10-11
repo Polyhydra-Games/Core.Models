@@ -67,7 +67,8 @@ jobs:
 
       - name: Report coverage
         if: always()
-        run: python3 scripts/summarize-coverage.py TestResults
+        # Ratchet floor: baseline on dev was 67.49% line coverage (2026-10-10). Raise as coverage grows.
+        run: python3 scripts/summarize-coverage.py TestResults --min-line 65
 
       - name: Upload coverage report
         if: always()
