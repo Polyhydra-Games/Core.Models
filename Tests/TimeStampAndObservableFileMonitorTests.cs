@@ -156,6 +156,75 @@ public class TimeStampAndObservableFileMonitorTests
         }
     }
 
+    [Test]
+    public void OnFileChanged_AfterSubjectDisposed_DropsNotificationInsteadOfThrowing()
+    {
+        // Dispose() can dispose FileSubject between OnFileChanged's _disposed check and OnNext (the raise happens
+        // outside the gate). A late FileSystemWatcher callback must not throw on the watcher's thread-pool thread.
+        var monitor = new ObservableFileMonitor(Path.GetTempPath(), "watched.txt");
+        monitor.FileSubject.Dispose();
+
+        var onFileChanged = typeof(ObservableFileMonitor).GetMethod("OnFileChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var args = new FileSystemEventArgs(WatcherChangeTypes.Changed, Path.GetTempPath(), "watched.txt");
+
+        Assert.DoesNotThrow(() => onFileChanged.Invoke(monitor, new object[] { this, args }));
+    }
+
+    [Test]
+    public void OnFileChanged_BlockingSubscriber_DoesNotDeadlockConcurrentDisposeAndInitialize()
+    {
+        var folder = Path.Combine(Path.GetTempPath(), $"core-models-monitor-onnext-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(folder);
+
+        try
+        {
+            var timeout = TimeSpan.FromSeconds(5);
+            var monitor = new ObservableFileMonitor(folder, "watched.txt");
+            monitor.Initialize();
+
+            using var subscriberEntered = new ManualResetEventSlim();
+            using var concurrentCallsDone = new ManualResetEventSlim();
+            var concurrentCallsFinishedWhileSubscriberBlocked = false;
+
+            using var subscription = monitor.Observable.Subscribe(_ =>
+            {
+                subscriberEntered.Set();
+                // Block the notifying thread until Dispose()/Initialize() complete (bounded).
+                concurrentCallsFinishedWhileSubscriberBlocked = concurrentCallsDone.Wait(timeout);
+            });
+
+            var onFileChanged = typeof(ObservableFileMonitor).GetMethod("OnFileChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
+            var args = new FileSystemEventArgs(WatcherChangeTypes.Changed, folder, "watched.txt");
+            var notifier = Task.Factory.StartNew(() => onFileChanged.Invoke(monitor, new object[] { this, args }),
+                CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+            Assert.That(subscriberEntered.Wait(timeout), Is.True, "Subscriber must be invoked.");
+
+            var initializer = Task.Factory.StartNew(() =>
+            {
+                try { monitor.Initialize(); }
+                catch (ObjectDisposedException) { }
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            var disposer = Task.Factory.StartNew(() => monitor.Dispose(),
+                CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+            var completed = Task.WaitAll(new Task[] { initializer, disposer }, timeout);
+            concurrentCallsDone.Set();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(completed, Is.True,
+                    "Dispose/Initialize must not block while a subscriber is handling a notification.");
+                Assert.That(concurrentCallsFinishedWhileSubscriberBlocked, Is.True);
+                Assert.That(notifier.Wait(timeout), Is.True);
+            });
+        }
+        finally
+        {
+            Directory.Delete(folder, recursive: true);
+        }
+    }
+
     private static ConcurrentDictionary<string, TimeStamp> GetActiveStamps()
     {
         var field = typeof(TimeStamp).GetField("_stamps", BindingFlags.NonPublic | BindingFlags.Static);

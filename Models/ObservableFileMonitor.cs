@@ -104,9 +104,19 @@ public class ObservableFileMonitor : IObservableFileMonitor, IDisposable
         {
             if (_disposed)
                 return;
-
-            FileSubject.OnNext(eventArgs.FullPath);
-            Debug.WriteLine($"File changed: {eventArgs.FullPath}");
         }
+
+        // Raise outside the gate so a blocking subscriber cannot deadlock Dispose()/Initialize().
+        // Dispose() may dispose FileSubject after the check above; a late notification is then dropped.
+        try
+        {
+            FileSubject.OnNext(eventArgs.FullPath);
+        }
+        catch (ObjectDisposedException)
+        {
+            return;
+        }
+
+        Debug.WriteLine($"File changed: {eventArgs.FullPath}");
     }
 }
