@@ -44,7 +44,16 @@ public static class CSVExtensions
         {
             return default;
         }
-        return provider.DeserializeObject<T>(value, continueOnError);
+        try
+        {
+            return provider.DeserializeObject<T>(value, continueOnError);
+        }
+        catch (Exception ex)
+        {
+            if (!continueOnError) throw;
+            Debug.WriteLine(ex.Message);
+            return default;
+        }
     }
     public static string ToCSV(this object value)
     {

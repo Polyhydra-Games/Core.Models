@@ -31,7 +31,7 @@ public class SystemTextJsonHelper : ISerializationProvider
         {
             return (true, SerializeObject(value));
         }
-        catch
+        catch (Exception ex) when (ex is JsonException or NotSupportedException or InvalidOperationException or ArgumentException)
         {
             return (false, null);
         }
