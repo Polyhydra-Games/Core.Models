@@ -11,7 +11,7 @@
 - `PolyhydraGames.Extensions`
 - `System.Reactive`
 
-**Target Frameworks:** net8.0 and net9.0
+**Target Frameworks:** net9.0 and net10.0
 
 ## Key Types
 

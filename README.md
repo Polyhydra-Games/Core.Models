@@ -123,7 +123,7 @@ var obj = json.FromJson<MyType>();
 The package has historical public releases on nuget.org and packages.polyhydragames.com. The workflow is configured to publish `2.0.1.<run_number>` from green `main` runs through nuget.org Trusted Publishing once the operator policy is configured and the first live run is verified.
 
 ### Target Frameworks
-- **Main package:** `net8.0` and `net9.0` (multi-target)
+- **Main package:** `net9.0` and `net10.0` (multi-target)
 - **Test project:** `net10.0`
 
 ### Prerequisites
