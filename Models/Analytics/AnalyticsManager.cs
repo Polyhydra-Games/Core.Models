@@ -10,6 +10,9 @@ namespace PolyhydraGames.Core.Models.Analytics
     /// Service to handle communicating with multiple analytics classes.
     /// </summary>
     ///  
+#pragma warning disable S1133 // Planned removal in the next major version; see docs/release-notes/2026-10-10-deprecate-analyticsmanager.md.
+    [Obsolete("AnalyticsManager is deprecated and will be removed in the next major version. Use Microsoft.Extensions.Logging.ILogger and System.Diagnostics.Metrics instead. See Core.Models#47.")]
+#pragma warning restore S1133
     public class AnalyticsManager : IAnalyticsManager
     {
         public IEnumerable<IAnalytics> Services => SnapshotServices();

@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // AnalyticsManager is deprecated (#47); these tests keep its behavior pinned until removal
 using System.Diagnostics;
 using System.IO;
 using System.Reactive.Subjects;
