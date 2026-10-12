@@ -8,7 +8,14 @@ import sys
 import xml.etree.ElementTree as ET
 
 
-root = Path(sys.argv[1] if len(sys.argv) > 1 else "TestResults")
+args = sys.argv[1:]
+min_line = None
+if "--min-line" in args:
+    index = args.index("--min-line")
+    min_line = float(args[index + 1])
+    del args[index:index + 2]
+
+root = Path(args[0] if args else "TestResults")
 reports = sorted(root.glob("**/coverage.cobertura.xml"))
 if not reports:
     print(f"No Cobertura report found under {root}")
@@ -29,10 +36,13 @@ for report in reports:
                 values[2] += int(match.group(1))
                 values[3] += int(match.group(2))
 
+failures = []
 lines = ["### Production assembly coverage", "", "| Assembly | Line | Branch |", "| --- | ---: | ---: |"]
 for assembly, (line_hit, line_total, branch_hit, branch_total) in sorted(totals.items()):
     line_pct = 100 * line_hit / line_total if line_total else 100.0
     branch_pct = 100 * branch_hit / branch_total if branch_total else 100.0
+    if min_line is not None and line_pct < min_line:
+        failures.append(f"{assembly} line coverage {line_pct:.2f}% is below the {min_line:.2f}% floor")
     lines.append(f"| {assembly} | {line_pct:.2f}% ({line_hit}/{line_total}) | {branch_pct:.2f}% ({branch_hit}/{branch_total}) |")
 
 summary = "\n".join(lines) + "\n"
@@ -42,3 +52,8 @@ if summary_file:
     summary_path = Path(summary_file)
     with summary_path.open("a", encoding="utf-8") as stream:
         stream.write(summary)
+
+if failures:
+    for failure in failures:
+        print(f"::error::{failure}")
+    raise SystemExit(1)

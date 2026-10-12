@@ -24,7 +24,7 @@
 
 Package consumers should expect:
 
-- `net8.0` and `net9.0` package assets.
+- `net9.0` and `net10.0` package assets.
 - Backward-compatible additive model changes by default.
 - Release notes for model member removals, renames, type changes, required-field changes, enum semantic shifts, or serialization behavior changes.
 

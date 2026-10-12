@@ -53,7 +53,7 @@ public static class StronglyTypedId
             id = Create<TId, Guid>(guid);
             return true;
         }
-        catch
+        catch (Exception ex) when (ex is FormatException or ArgumentException or OverflowException or InvalidOperationException)
         {
             id = default;
             return false;
@@ -82,7 +82,7 @@ public static class StronglyTypedId
             id = FromString<TId>(value);
             return true;
         }
-        catch
+        catch (Exception ex) when (ex is FormatException or ArgumentException or OverflowException or InvalidOperationException)
         {
             id = default;
             return false;
@@ -117,7 +117,7 @@ public static class StronglyTypedId
             id = Create<TId, int>(parsed);
             return true;
         }
-        catch
+        catch (Exception ex) when (ex is FormatException or ArgumentException or OverflowException or InvalidOperationException)
         {
             id = default;
             return false;
@@ -152,7 +152,7 @@ public static class StronglyTypedId
             id = Create<TId, long>(parsed);
             return true;
         }
-        catch
+        catch (Exception ex) when (ex is FormatException or ArgumentException or OverflowException or InvalidOperationException)
         {
             id = default;
             return false;

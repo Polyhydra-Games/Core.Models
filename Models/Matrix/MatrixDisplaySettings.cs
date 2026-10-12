@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -152,7 +153,7 @@ public static class MatrixDisplaySettingsSchema
             return reDeserialized != null &&
                    JsonSerializer.Serialize(reDeserialized) == reSerialized;
         }
-        catch
+        catch (Exception ex) when (ex is JsonException or NotSupportedException or InvalidOperationException or ArgumentException)
         {
             return false;
         }
