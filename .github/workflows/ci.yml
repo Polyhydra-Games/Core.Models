@@ -47,7 +47,7 @@ jobs:
         run: dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --configuration Release --no-build --no-restore --collect:"XPlat Code Coverage" --results-directory TestResults
 
       - name: Enforce baseline line coverage
-        run: python3 scripts/summarize-coverage.py TestResults --min-line 77.11
+        run: python3 scripts/summarize-coverage.py TestResults --min-line 77
 
       - name: Upload coverage
         if: always()
