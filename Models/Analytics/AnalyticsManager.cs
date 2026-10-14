@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using PolyhydraGames.Core.Interfaces;
 
@@ -55,17 +56,21 @@ namespace PolyhydraGames.Core.Models.Analytics
             return succeeded;
         }
 
-        public async Task RunActionAsync(Func<IAnalytics, Task> action)
+        public async Task RunActionAsync(Func<IAnalytics, Task> action, CancellationToken cancellationToken = default)
         {
             foreach (var item in SnapshotServices())
+            {
+                cancellationToken.ThrowIfCancellationRequested();
                 await action(item).ConfigureAwait(false);
+            }
         }
 
-        public async Task<bool> TryRunActionAsync(Func<IAnalytics, Task> action)
+        public async Task<bool> TryRunActionAsync(Func<IAnalytics, Task> action, CancellationToken cancellationToken = default)
         {
             var succeeded = true;
             foreach (var item in SnapshotServices())
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try { await action(item).ConfigureAwait(false); }
                 catch (Exception ex)
                 {
