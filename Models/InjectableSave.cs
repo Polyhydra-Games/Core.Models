@@ -1,20 +1,24 @@
 ﻿using System;
 using PolyhydraGames.Core.Interfaces;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PolyhydraGames.Core.Models
 {
-    public abstract class InjectableSave : IInjectableSave
+    public abstract class InjectableSave : IInjectableSaveAsync
     {
-        private Action? _invokeSave;
+        private Func<Task>? _invokeSave;
 
-        public void Save()
+        public async ValueTask SaveAsync(CancellationToken cancellationToken = default)
         {
-            Action? invokeSave = this._invokeSave;
+            cancellationToken.ThrowIfCancellationRequested();
+            Func<Task>? invokeSave = this._invokeSave;
             if (invokeSave == null)
                 return;
-            invokeSave();
+            await invokeSave().ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
-        public void Initialize(Action invokeSave) => this._invokeSave = invokeSave;
+        public void Initialize(Func<Task> invokeSave) => this._invokeSave = invokeSave;
     }
 }
