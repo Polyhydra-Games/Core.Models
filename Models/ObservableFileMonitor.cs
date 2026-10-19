@@ -98,7 +98,13 @@ public class ObservableFileMonitor : IObservableFileMonitor, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private void OnFileChanged(object sender, FileSystemEventArgs eventArgs)
+    private void OnFileChanged(object sender, FileSystemEventArgs eventArgs) => RaiseChanged(eventArgs.FullPath);
+
+    /// <summary>
+    /// Raises a change notification exactly as the file watcher would. Internal test seam so races with
+    /// <see cref="Dispose"/> can be driven deterministically without real filesystem events.
+    /// </summary>
+    internal void RaiseChanged(string fullPath)
     {
         lock (_watcherGate)
         {
@@ -110,13 +116,13 @@ public class ObservableFileMonitor : IObservableFileMonitor, IDisposable
         // Dispose() may dispose FileSubject after the check above; a late notification is then dropped.
         try
         {
-            FileSubject.OnNext(eventArgs.FullPath);
+            FileSubject.OnNext(fullPath);
         }
         catch (ObjectDisposedException)
         {
             return;
         }
 
-        Debug.WriteLine($"File changed: {eventArgs.FullPath}");
+        Debug.WriteLine($"File changed: {fullPath}");
     }
 }

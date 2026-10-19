@@ -170,35 +170,37 @@ public class TimeStampAndObservableFileMonitorTests
         Assert.DoesNotThrow(() => onFileChanged.Invoke(monitor, new object[] { this, args }));
     }
 
+    // Safety timeout only guards against a hung test run; the deadlock timeout is how long Dispose/Initialize may
+    // take while a subscriber is blocked. They are deliberately separate so a slow CI box cannot fake a deadlock.
+    private static readonly TimeSpan SafetyTimeout = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan DeadlockTimeout = TimeSpan.FromSeconds(5);
+
     [Test]
-    public void OnFileChanged_BlockingSubscriber_DoesNotDeadlockConcurrentDisposeAndInitialize()
+    public async Task Notification_BlockingSubscriber_DoesNotDeadlockConcurrentDisposeAndInitialize()
     {
         var folder = Path.Combine(Path.GetTempPath(), $"core-models-monitor-onnext-{Guid.NewGuid():N}");
         Directory.CreateDirectory(folder);
 
         try
         {
-            var timeout = TimeSpan.FromSeconds(5);
             var monitor = new ObservableFileMonitor(folder, "watched.txt");
             monitor.Initialize();
 
-            using var subscriberEntered = new ManualResetEventSlim();
-            using var concurrentCallsDone = new ManualResetEventSlim();
-            var concurrentCallsFinishedWhileSubscriberBlocked = false;
+            var subscriberEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var releaseSubscriber = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var subscriberReleased = false; // written/read only on the notifier thread; read by test after notifier completes
 
             using var subscription = monitor.Observable.Subscribe(_ =>
             {
-                subscriberEntered.Set();
-                // Block the notifying thread until Dispose()/Initialize() complete (bounded).
-                concurrentCallsFinishedWhileSubscriberBlocked = concurrentCallsDone.Wait(timeout);
+                subscriberEntered.TrySetResult();
+                releaseSubscriber.Task.Wait(SafetyTimeout);
+                subscriberReleased = releaseSubscriber.Task.IsCompleted;
             });
 
-            var onFileChanged = typeof(ObservableFileMonitor).GetMethod("OnFileChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
-            var args = new FileSystemEventArgs(WatcherChangeTypes.Changed, folder, "watched.txt");
-            var notifier = Task.Factory.StartNew(() => onFileChanged.Invoke(monitor, new object[] { this, args }),
+            var notifier = Task.Factory.StartNew(() => monitor.RaiseChanged(Path.Combine(folder, "watched.txt")),
                 CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-            Assert.That(subscriberEntered.Wait(timeout), Is.True, "Subscriber must be invoked.");
+            await subscriberEntered.Task.WaitAsync(SafetyTimeout);
 
             var initializer = Task.Factory.StartNew(() =>
             {
@@ -208,21 +210,90 @@ public class TimeStampAndObservableFileMonitorTests
             var disposer = Task.Factory.StartNew(() => monitor.Dispose(),
                 CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-            var completed = Task.WaitAll(new Task[] { initializer, disposer }, timeout);
-            concurrentCallsDone.Set();
+            var both = Task.WhenAll(initializer, disposer);
+            var finished = await Task.WhenAny(both, Task.Delay(DeadlockTimeout));
+            var noDeadlock = ReferenceEquals(finished, both);
+
+            releaseSubscriber.TrySetResult();
+            await notifier.WaitAsync(SafetyTimeout);
+            await both.WaitAsync(SafetyTimeout);
 
             Assert.Multiple(() =>
             {
-                Assert.That(completed, Is.True,
+                Assert.That(noDeadlock, Is.True,
                     "Dispose/Initialize must not block while a subscriber is handling a notification.");
-                Assert.That(concurrentCallsFinishedWhileSubscriberBlocked, Is.True);
-                Assert.That(notifier.Wait(timeout), Is.True);
+                Assert.That(subscriberReleased, Is.True);
             });
         }
         finally
         {
             Directory.Delete(folder, recursive: true);
         }
+    }
+
+    [Test]
+    public void Notification_AfterDispose_IsDroppedNotThrown()
+    {
+        var monitor = new ObservableFileMonitor(Path.GetTempPath(), "watched.txt");
+        var received = 0;
+        monitor.Observable.Subscribe(_ => Interlocked.Increment(ref received));
+        monitor.Dispose();
+
+        Assert.DoesNotThrow(() => monitor.RaiseChanged(Path.Combine(Path.GetTempPath(), "watched.txt")));
+        Assert.That(received, Is.Zero);
+    }
+
+    [Test]
+    public async Task Notification_RacingDispose_IsDroppedNotThrown()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "watched.txt");
+        const int rounds = 50;
+
+        for (var i = 0; i < rounds; i++)
+        {
+            var monitor = new ObservableFileMonitor(Path.GetTempPath(), "watched.txt");
+            using var sub = monitor.Observable.Subscribe(_ => { });
+            using var barrier = new Barrier(2);
+
+            var notifier = Task.Factory.StartNew(() =>
+            {
+                barrier.SignalAndWait(SafetyTimeout);
+                for (var n = 0; n < 20; n++) monitor.RaiseChanged(path);
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            var disposer = Task.Factory.StartNew(() =>
+            {
+                barrier.SignalAndWait(SafetyTimeout);
+                monitor.Dispose();
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+            await Task.WhenAll(notifier, disposer).WaitAsync(SafetyTimeout);
+        }
+    }
+
+    [Test]
+    public async Task Notification_DisposeWhileSubscriberBlocked_CompletesAndLateNotificationIsDropped()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "watched.txt");
+        var monitor = new ObservableFileMonitor(Path.GetTempPath(), "watched.txt");
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        monitor.Observable.Subscribe(_ => { entered.TrySetResult(); release.Task.Wait(SafetyTimeout); });
+
+        var notifier = Task.Factory.StartNew(() => monitor.RaiseChanged(path),
+            CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        await entered.Task.WaitAsync(SafetyTimeout);
+
+        var disposer = Task.Factory.StartNew(() => monitor.Dispose(),
+            CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        var finished = await Task.WhenAny(disposer, Task.Delay(DeadlockTimeout));
+        var disposeReturned = ReferenceEquals(finished, disposer);
+
+        release.TrySetResult();
+        await notifier.WaitAsync(SafetyTimeout); // must not throw
+        await disposer.WaitAsync(SafetyTimeout);
+
+        Assert.That(disposeReturned, Is.True, "Dispose must not wait for a blocked subscriber.");
+        Assert.DoesNotThrow(() => monitor.RaiseChanged(path));
     }
 
     private static ConcurrentDictionary<string, TimeStamp> GetActiveStamps()

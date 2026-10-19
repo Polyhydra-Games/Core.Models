@@ -11,6 +11,7 @@ namespace PolyhydraGames.Core.Models.DelayTimer;
 public class DelayedTimer
 {
     private readonly object _sync = new();
+    private readonly TimeProvider _timeProvider;
     public int StartingDelay { get; }
     public int Step { get; }
     public int MaxDelay { get; }
@@ -19,7 +20,13 @@ public class DelayedTimer
 
     public CancellationTokenSource? CTS { get; private set; }
     public DelayedTimer(string name, int startingDelay, int step, int maxDelay)
+        : this(name, startingDelay, step, maxDelay, TimeProvider.System)
     {
+    }
+
+    internal DelayedTimer(string name, int startingDelay, int step, int maxDelay, TimeProvider timeProvider)
+    {
+        _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
         Name = name;
         StartingDelay = startingDelay;
         Step = step;
@@ -55,7 +62,7 @@ public class DelayedTimer
 
         try
         {
-            await Task.Delay(TimeSpan.FromSeconds(nextDelay), token);
+            await Task.Delay(TimeSpan.FromSeconds(nextDelay), _timeProvider, token);
         }
         catch
         {
@@ -83,14 +90,24 @@ public class DelayedTimer
 
     public void Reset()
     {
+        CancellationTokenSource? cancellation;
         lock (_sync)
         {
-            var cancellation = CTS;
+            cancellation = CTS;
             CTS = null;
             CurrentDelay = StartingDelay;
-            if (cancellation == null) return;
+        }
 
+        if (cancellation == null) return;
+
+        // Cancel outside the lock so cancellation callbacks never run under _sync. Ownership was taken above
+        // (CTS cleared), so Delay()'s finally block will not dispose it; Reset is the sole disposer.
+        try
+        {
             cancellation.Cancel();
+        }
+        finally
+        {
             cancellation.Dispose();
         }
     }
