@@ -4,8 +4,8 @@ using PolyhydraGames.Core.Models.DelayTimer;
 namespace PolyhydraGames.Core.Models.Test;
 
 /// <summary>
-/// Concurrency and reset semantics for <see cref="DelayedTimer"/>. The timer works in whole seconds and has no
-/// TimeProvider seam, so every pending Delay() here is cancelled via Reset(); nothing waits out a real delay.
+/// Concurrency and reset semantics for <see cref="DelayedTimer"/>. Time is driven by a
+/// <see cref="ManualTimeProvider"/>, so nothing waits on the wall clock.
 /// </summary>
 [TestFixture]
 public class DelayedTimerTests
@@ -15,7 +15,7 @@ public class DelayedTimerTests
     [Test]
     public async Task Reset_WhileIdle_DoesNotThrow_AndRestoresStartingDelay()
     {
-        var timer = new DelayedTimer("idle", 2, 1, 10);
+        var timer = new DelayedTimer("idle", 2, 1, 10, new ManualTimeProvider());
 
         Assert.DoesNotThrow(() => timer.Reset());
         Assert.DoesNotThrow(() => timer.Reset());
@@ -28,7 +28,7 @@ public class DelayedTimerTests
     [Test]
     public async Task Reset_DuringPendingDelay_CancelsAwaiter_AndClearsState()
     {
-        var timer = new DelayedTimer("pending", 0, 1, 10);
+        var timer = new DelayedTimer("pending", 0, 1, 10, new ManualTimeProvider());
         var pending = timer.Delay();
         Assert.That(timer.CTS, Is.Not.Null);
         Assert.That(timer.CurrentDelay, Is.EqualTo(1));
@@ -44,7 +44,7 @@ public class DelayedTimerTests
     [Test]
     public async Task ConcurrentDelay_WhilePending_ThrowsInvalidOperation_AndFirstStaysPending()
     {
-        var timer = new DelayedTimer("concurrent", 0, 1, 10);
+        var timer = new DelayedTimer("concurrent", 0, 1, 10, new ManualTimeProvider());
         var first = timer.Delay();
 
         Assert.ThrowsAsync<InvalidOperationException>(async () => await timer.Delay());
@@ -58,7 +58,7 @@ public class DelayedTimerTests
     [Test]
     public async Task ConcurrentDelay_ManyThreads_ExactlyOneWins()
     {
-        var timer = new DelayedTimer("many", 0, 1, 100);
+        var timer = new DelayedTimer("many", 0, 1, 100, new ManualTimeProvider());
         const int callers = 32;
         using var gate = new ManualResetEventSlim(false);
 
@@ -72,10 +72,15 @@ public class DelayedTimerTests
 
         gate.Set();
 
-        // Losers fault almost immediately; wait until callers - 1 have faulted.
-        var deadline = DateTime.UtcNow + Bound;
-        while (tasks.Count(t => t.IsFaulted) < callers - 1 && DateTime.UtcNow < deadline)
-            await Task.Delay(5);
+        // Losers fault promptly; await them via WhenAny (no polling, no sleeps) until callers - 1 have faulted.
+        var pending = tasks.ToList();
+        var faultedCount = 0;
+        while (faultedCount < callers - 1)
+        {
+            var done = await Task.WhenAny(pending).WaitAsync(Bound);
+            pending.Remove(done);
+            faultedCount++;
+        }
 
         var faulted = tasks.Where(t => t.IsFaulted).ToList();
         Assert.That(faulted, Has.Count.EqualTo(callers - 1));
@@ -87,10 +92,46 @@ public class DelayedTimerTests
     }
 
     [Test]
+    public async Task Delay_CompletesOnlyWhenTimeProviderAdvances_AndKeepsEscalatedDelay()
+    {
+        var clock = new ManualTimeProvider();
+        var timer = new DelayedTimer("manual", 0, 2, 10, clock);
+
+        var first = timer.Delay();
+        clock.Advance(TimeSpan.FromSeconds(1));
+        Assert.That(first.IsCompleted, Is.False);
+        clock.Advance(TimeSpan.FromSeconds(1));
+        await first.WaitAsync(Bound);
+
+        Assert.That(timer.CTS, Is.Null);
+        Assert.That(timer.CurrentDelay, Is.EqualTo(2));
+        Assert.That(clock.ActiveTimerCount, Is.Zero);
+
+        var second = timer.Delay();
+        clock.Advance(TimeSpan.FromSeconds(3));
+        Assert.That(second.IsCompleted, Is.False, "Second delay escalates to 4s.");
+        clock.Advance(TimeSpan.FromSeconds(1));
+        await second.WaitAsync(Bound);
+        Assert.That(timer.CurrentDelay, Is.EqualTo(4));
+    }
+
+    [Test]
+    public void Delay_BeyondMaximum_ThrowsMaximumDuration_WithoutLeavingCts()
+    {
+        var clock = new ManualTimeProvider();
+        var timer = new DelayedTimer("max", 0, 5, 4, clock);
+
+        Assert.ThrowsAsync<MaximumDurationException>(async () => await timer.Delay());
+        Assert.That(timer.CTS, Is.Null);
+        Assert.That(timer.CurrentDelay, Is.EqualTo(4));
+    }
+
+    [Test]
     public async Task DelayResetRace_NeverCorruptsState_AndEveryDelayEndsCancelledOrRejected()
     {
-        var timer = new DelayedTimer("race", 0, 1, 1000);
-        const int iterations = 200;
+        var clock = new ManualTimeProvider();
+        var timer = new DelayedTimer("race", 0, 1, 100000, clock);
+        const int iterations = 500;
         var outcomes = new List<Task>();
         using var stop = new CancellationTokenSource();
 
@@ -102,8 +143,7 @@ public class DelayedTimerTests
 
         for (var i = 0; i < iterations; i++)
         {
-            var d = timer.Delay();
-            outcomes.Add(d);
+            outcomes.Add(timer.Delay());
             await Task.Yield();
         }
 
@@ -111,13 +151,14 @@ public class DelayedTimerTests
         await resetter.WaitAsync(Bound);
         timer.Reset();
 
-        // Every delay must end promptly as cancelled, or as an overlap rejection; none may hang or fail otherwise.
+        // The manual clock never advances, so no delay can complete: each must be cancelled or rejected,
+        // and none may surface ObjectDisposedException from a disposed CTS.
         foreach (var outcome in outcomes)
         {
             try
             {
                 await outcome.WaitAsync(Bound);
-                Assert.Fail("A multi-second delay completed instead of being cancelled.");
+                Assert.Fail("A delay completed although the clock never advanced.");
             }
             catch (TaskCanceledException) { }
             catch (InvalidOperationException) { }
@@ -125,11 +166,9 @@ public class DelayedTimerTests
 
         Assert.That(timer.CTS, Is.Null);
         Assert.That(timer.CurrentDelay, Is.Zero);
-        Assert.DoesNotThrowAsync(async () =>
-        {
-            var next = timer.Delay();
-            timer.Reset();
-            try { await next.WaitAsync(Bound); } catch (TaskCanceledException) { }
-        });
+        Assert.That(clock.ActiveTimerCount, Is.Zero);
+        var next = timer.Delay();
+        timer.Reset();
+        Assert.ThrowsAsync<TaskCanceledException>(async () => await next.WaitAsync(Bound));
     }
 }
