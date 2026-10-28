@@ -92,3 +92,16 @@ No P0 finding. Build, the 194-test run, the coverage gate, and the latest `main`
 ## 7. Commands not run
 
 Not run, by design: publish, push to shared branches, PR creation or merge, issue edits or closes, mutation workflow dispatch, Stryker run locally.
+
+## Update 2026-10-28: refs changed since this was written
+
+The "Refs and base" table above is a 2026-10-23 snapshot. Repo hygiene on Polyhydra-Games/Core.Interfaces#10 changed it. Current values:
+
+| Item | Value at time of writing | Now | Command |
+| --- | --- | --- | --- |
+| GitHub default branch | `import/lancer1977-main` | `main` | `gh repo view Polyhydra-Games/Core.Models --json defaultBranchRef` |
+| `origin/main` | `3ef4bcb` | `94bd2ed` | `git rev-parse --short origin/main` |
+| `origin/import/lancer1977-main` | `a39b7fe` | Deleted (its tip was fully contained in `main`; tip recorded on Core.Interfaces#10) | `git ls-remote --heads origin 'import/*'` (empty) |
+| `origin/dev` | Did not exist | Still does not exist; libraries have no dev/prod stack, PRs go straight to `main` | `git ls-remote --heads origin dev` (empty) |
+
+The open decision in section 6 about using `main` as the base is settled: `main` is the integration base. The `lancer` remote (`lancer1977/Core.Models`, archived, `no_push`) is retained locally as a read-only archive.
