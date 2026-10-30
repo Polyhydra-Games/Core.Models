@@ -144,7 +144,7 @@ public class TimeStampAndObservableFileMonitorTests
                     () => string.Join(Environment.NewLine, unexpected.Select(e => e.ToString())));
                 Assert.That(monitor.CreatedWatchers, Has.Count.EqualTo(1),
                     "Concurrent Initialize calls must not allocate watchers that can be overwritten.");
-                Assert.That(monitor.CreatedWatchers, Is.All.Matches<TrackingFileSystemWatcher>(watcher => watcher.IsDisposed),
+                Assert.That(monitor.CreatedWatchers, Is.All.Matches<TrackingFileSystemWatcher>(watcher => watcher is { IsDisposed: true }),
                     "Dispose must release every watcher that was allocated during concurrent initialization.");
                 Assert.That(GetWatcher(monitor), Is.Null);
                 Assert.Throws<ObjectDisposedException>(() => monitor.Initialize());
