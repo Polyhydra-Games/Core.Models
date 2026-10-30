@@ -35,7 +35,7 @@ public class DelayedTimerTests
 
         timer.Reset();
 
-        Assert.ThrowsAsync<TaskCanceledException>(async () => await pending.WaitAsync(Bound));
+        await Assert.ThrowsAsync<TaskCanceledException>(async () => await pending.WaitAsync(Bound));
         Assert.That(timer.CTS, Is.Null);
         Assert.That(timer.CurrentDelay, Is.Zero);
         await Task.CompletedTask;
@@ -47,11 +47,11 @@ public class DelayedTimerTests
         var timer = new DelayedTimer("concurrent", 0, 1, 10, new ManualTimeProvider());
         var first = timer.Delay();
 
-        Assert.ThrowsAsync<InvalidOperationException>(async () => await timer.Delay());
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await timer.Delay());
         Assert.That(first.IsCompleted, Is.False);
 
         timer.Reset();
-        Assert.ThrowsAsync<TaskCanceledException>(async () => await first.WaitAsync(Bound));
+        await Assert.ThrowsAsync<TaskCanceledException>(async () => await first.WaitAsync(Bound));
         await Task.CompletedTask;
     }
 
@@ -88,7 +88,7 @@ public class DelayedTimerTests
 
         timer.Reset();
         var winner = tasks.Single(t => !t.IsFaulted);
-        Assert.ThrowsAsync<TaskCanceledException>(async () => await winner.WaitAsync(Bound));
+        await Assert.ThrowsAsync<TaskCanceledException>(async () => await winner.WaitAsync(Bound));
     }
 
     [Test]
@@ -116,12 +116,12 @@ public class DelayedTimerTests
     }
 
     [Test]
-    public void Delay_BeyondMaximum_ThrowsMaximumDuration_WithoutLeavingCts()
+    public async Task Delay_BeyondMaximum_ThrowsMaximumDuration_WithoutLeavingCts()
     {
         var clock = new ManualTimeProvider();
         var timer = new DelayedTimer("max", 0, 5, 4, clock);
 
-        Assert.ThrowsAsync<MaximumDurationException>(async () => await timer.Delay());
+        await Assert.ThrowsAsync<MaximumDurationException>(async () => await timer.Delay());
         Assert.That(timer.CTS, Is.Null);
         Assert.That(timer.CurrentDelay, Is.EqualTo(4));
     }
@@ -169,6 +169,6 @@ public class DelayedTimerTests
         Assert.That(clock.ActiveTimerCount, Is.Zero);
         var next = timer.Delay();
         timer.Reset();
-        Assert.ThrowsAsync<TaskCanceledException>(async () => await next.WaitAsync(Bound));
+        await Assert.ThrowsAsync<TaskCanceledException>(async () => await next.WaitAsync(Bound));
     }
 }
