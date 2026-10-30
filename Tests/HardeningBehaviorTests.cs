@@ -99,8 +99,8 @@ public sealed class HardeningBehaviorTests
         timer.Reset();
 
         Assert.That(cancellation.IsCancellationRequested, Is.True);
-        Assert.ThrowsAsync<TaskCanceledException>(async () => await pending);
-        Assert.DoesNotThrowAsync(async () => await timer.Delay());
+        await Assert.ThrowsAsync<TaskCanceledException>(async () => await pending);
+        await Assert.DoesNotThrowAsync(async () => await timer.Delay());
     }
 
     [Test]
@@ -112,13 +112,13 @@ public sealed class HardeningBehaviorTests
 
         cancellation.Cancel();
 
-        Assert.ThrowsAsync<TaskCanceledException>(async () => await pending);
+        await Assert.ThrowsAsync<TaskCanceledException>(async () => await pending);
         Assert.That(timer.CurrentDelay, Is.Zero);
 
         var next = timer.Delay();
         Assert.That(timer.CurrentDelay, Is.EqualTo(1));
         timer.Reset();
-        Assert.ThrowsAsync<TaskCanceledException>(async () => await next);
+        await Assert.ThrowsAsync<TaskCanceledException>(async () => await next);
     }
 
     [Test]
