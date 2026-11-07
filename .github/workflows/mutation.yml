@@ -12,7 +12,7 @@ permissions:
 jobs:
   mutate:
     name: Stryker mutation score
-    runs-on: [self-hosted, Linux, X64, core-models-ci]
+    runs-on: [self-hosted, Linux, X64, core-models-validation]
     timeout-minutes: 60
     env:
       TMPDIR: ${{ github.workspace }}/.runner-temp
