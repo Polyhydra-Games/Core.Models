@@ -36,7 +36,7 @@ jobs:
         with:
           dotnet-version: |
             8.0.x
-            10.0.x
+          global-json-file: global.json
 
       - name: Restore
         run: dotnet restore Tests/PolyhydraGames.Core.Models.Test.csproj
@@ -82,7 +82,7 @@ jobs:
         with:
           dotnet-version: |
             8.0.x
-            10.0.x
+          global-json-file: global.json
 
       - name: Pack
         run: dotnet pack ${{ matrix.project }} --configuration Release -p:PackageVersion=${PACKAGE_VERSION} --output artifacts/packages
@@ -114,7 +114,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
-          dotnet-version: 10.0.x
+          global-json-file: global.json
 
       - name: NuGet login (trusted publishing)
         id: login
