@@ -101,6 +101,4 @@ Downstream owners:
 
 ## Cross-Repo Coordination
 
-- [SvengoolieDB media metadata transition](</home/lancer1977/code/SvengoolieDB/docs/roadmaps/media-metadata-transition/README.md>)
-- [One-swoop execution map](</home/lancer1977/code/SvengoolieDB/docs/roadmaps/media-metadata-transition/execution-map.md>)
-- [Cross-project link map](</home/lancer1977/code/SvengoolieDB/docs/roadmaps/media-metadata-transition/link-map.md>)
+- The SvengoolieDB media metadata transition roadmap lives in the SvengoolieDB repository (private).

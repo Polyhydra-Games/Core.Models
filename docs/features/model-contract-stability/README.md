@@ -116,7 +116,7 @@ dotnet list Models/PolyhydraGames.Core.Models.csproj package --include-transitiv
 Media-contract changes also need the closest consumer proof, starting with:
 
 ```bash
-cd /mnt/data/lancer1977/code/core.nas
+cd path/to/core.nas
 dotnet test src/NasDb.Tests/NasDb.Tests.csproj --configuration Release
 ```
 
