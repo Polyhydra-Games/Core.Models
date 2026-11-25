@@ -120,7 +120,7 @@ var obj = json.FromJson<MyType>();
 <PackageReference Include="PolyhydraGames.Core.Models" Version="2.0.1.*" />
 ```
 
-The package has historical public releases on nuget.org and packages.polyhydragames.com. The workflow is configured to publish `2.0.1.<run_number>` from green `main` runs through nuget.org Trusted Publishing once the operator policy is configured and the first live run is verified.
+The package has historical public releases on nuget.org and a self-hosted package feed. The workflow is configured to publish `2.0.1.<run_number>` from green `main` runs through nuget.org Trusted Publishing once the operator policy is configured and the first live run is verified.
 
 ### Target Frameworks
 - **Main package:** `net9.0` and `net10.0` (multi-target)
@@ -153,7 +153,7 @@ Shared contract changes must pass the local package validation and at least one 
 - Local tests: `dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --configuration Release`.
 - Package build: `dotnet pack Models/PolyhydraGames.Core.Models.csproj --configuration Release --no-restore --output artifacts/packages`.
 - Dependency advisory check: `dotnet list Models/PolyhydraGames.Core.Models.csproj package --include-transitive --vulnerable`.
-- Downstream validation: run the closest consumer test gate, starting with `core.nas` for media contracts: `dotnet test src/NasDb.Tests/NasDb.Tests.csproj --configuration Release` from `/mnt/data/lancer1977/code/core.nas`.
+- Downstream validation: run the closest consumer test gate, starting with `core.nas` for media contracts: `dotnet test src/NasDb.Tests/NasDb.Tests.csproj --configuration Release` from a local checkout of `core.nas`.
 - Release notes: add a compatibility note using `docs/release-notes/shared-contract-change-template.md` for any added, removed, renamed, or semantically changed public model member.
 
 ### Typical Usage

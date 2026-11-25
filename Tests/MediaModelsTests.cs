@@ -58,7 +58,7 @@ public class MediaModelsTests
                 RootName = "Synology Video",
                 RelativePath = "TV Shows/Svengoolie/Svengoolie - The Killer Shrews [S02E20].mp4",
                 FullPath = "/mnt/syn2/video/TV Shows/Svengoolie/Svengoolie - The Killer Shrews [S02E20].mp4",
-                PublicUrl = "https://svengooliedb.polyhydragames.com/media/Svengoolie%20-%20The%20Killer%20Shrews%20%5BS02E20%5D.mp4"
+                PublicUrl = "https://svengooliedb.example.test/media/Svengoolie%20-%20The%20Killer%20Shrews%20%5BS02E20%5D.mp4"
             },
             TechnicalMetadata = new MediaTechnicalMetadata
             {
