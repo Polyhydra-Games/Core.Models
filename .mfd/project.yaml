@@ -1,0 +1,41 @@
+schema_version: 3
+portfolio:
+  repository: polyhydra-games/core.models
+  projects:
+    - id: core-models
+      role: library
+  shape:
+    kind: library
+merge_policy:
+  integration_branch: dev
+  protected_branch: main
+  required_checks:
+    - Build, test, and measure coverage
+    - Pack core-models
+  test_tiers:
+    unit:
+      command: dotnet test Tests/PolyhydraGames.Core.Models.Test.csproj --configuration Release
+      required_for: [main]
+    integration:
+      command: "# Integration tests not yet implemented"
+      required_for: []
+    automation:
+      command: "# Automation/smoke tests not yet implemented"
+      required_for: []
+  escalate_paths:
+    - "**/*secret*"
+    - "**/*credential*"
+    - "**/*auth*"
+    - "**/*token*"
+    - ".github/workflows/**"
+    - "**/*infra*"
+    - "**/*deploy*"
+    - "global.json"
+    - "NuGet.config"
+  escalate_labels:
+    - decision
+    - security
+    - blocker
+  require_pr_tests: true
+  test_paths:
+    - "Tests/**"
